@@ -9,7 +9,9 @@ export default function Navbar() {
 
   return (
     <div className='navbar'>
-      <div className='navbar__logo'>app</div>
+      <div className='navbar__logo'>
+        <Link href='/'>App</Link>
+      </div>
       <div className='navbar__list'>
         <Link href='/plan/list' className='navbar__list--item'>
           경로 리스트
