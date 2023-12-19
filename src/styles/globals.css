@@ -27,7 +27,11 @@
 }
 
 .layout {
-  @apply pt-[52px];
+  @apply pt-[50px];
+}
+
+.map {
+  height: var(--window-height);
 }
 
 @media only screen and (max-width: 600px) {
