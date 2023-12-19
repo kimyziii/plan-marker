@@ -1,7 +1,9 @@
 import Link from '../../node_modules/next/link'
+import Layout from '../component/Layout'
 
 export default function Home() {
   return (
+    <Layout>
       <div>
         <div>
           <Link href='/plan/new'>경로 생성 페이지</Link>
@@ -29,5 +31,6 @@ export default function Home() {
           <h2>경로 리스트 컴포넌트</h2>
         </div>
       </div>
+    </Layout>
   )
 }
