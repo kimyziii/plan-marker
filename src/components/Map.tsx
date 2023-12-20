@@ -1,11 +1,19 @@
 /*global kakao*/
 import Script from 'next/script'
-import { useEffect } from 'react'
+import { useEffect, Dispatch, SetStateAction } from 'react'
 
 declare global {
   interface Window {
     kakao: any
   }
+}
+
+// 강남 좌표
+const DEFAULT_LAT = 37.497625203
+const DEFAULT_LNG = 127.03088379
+
+interface MapProps {
+  setMap: Dispatch<SetStateAction<any>>
 }
 
 /**
@@ -16,7 +24,7 @@ const setRootHeight = () => {
   root.style.setProperty('--window-height', `${window.innerHeight - 50}px`)
 }
 
-export default function Map() {
+export default function Map({ setMap }: MapProps) {
   useEffect(() => {
     setRootHeight()
     window.addEventListener('resize', setRootHeight)
@@ -28,13 +36,15 @@ export default function Map() {
   }, [])
 
   function loadKakaoMap() {
-    window.kakao.maps.load(function () {
+    window.kakao.maps.load(() => {
       const container = document.getElementById('map')
       const options = {
-        center: new window.kakao.maps.LatLng(33.450701, 126.570667),
+        center: new window.kakao.maps.LatLng(DEFAULT_LAT, DEFAULT_LNG),
         level: 3,
       }
-      new window.kakao.maps.Map(container, options)
+      const map = new window.kakao.maps.Map(container, options)
+
+      setMap(map)
     })
   }
 
