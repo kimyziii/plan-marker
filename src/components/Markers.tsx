@@ -1,22 +1,19 @@
+import { StoreType } from '@/interface'
 import { Dispatch, SetStateAction, useEffect, useCallback } from 'react'
 
 interface MarkerProps {
   map: any
-  storeDatas: any[]
+  stores: StoreType[]
   setCurrentStore: Dispatch<SetStateAction<any>>
 }
 
-export default function Markers({
-  map,
-  storeDatas,
-  setCurrentStore,
-}: MarkerProps) {
+export default function Markers({ map, stores, setCurrentStore }: MarkerProps) {
   const loadKaKaoMarkers = useCallback(() => {
     if (map) {
       // store marker
-      storeDatas?.map((store) => {
-        var imageSrc = store?.bizcnd_code_nm
-            ? `/images/markers/${store?.bizcnd_code_nm}.png`
+      stores?.map((store) => {
+        var imageSrc = store?.category
+            ? `/images/markers/${store?.category}.png`
             : '/images/markers/default.png',
           imageSize = new window.kakao.maps.Size(40, 40),
           imageOption = { offset: new window.kakao.maps.Point(27, 69) }
@@ -26,10 +23,7 @@ export default function Markers({
             imageSize,
             imageOption,
           ),
-          markerPosition = new window.kakao.maps.LatLng(
-            store?.y_dnts,
-            store?.x_cnts,
-          )
+          markerPosition = new window.kakao.maps.LatLng(store?.lat, store?.lng)
 
         var marker = new window.kakao.maps.Marker({
           position: markerPosition,
@@ -39,7 +33,7 @@ export default function Markers({
         marker.setMap(map)
 
         // 인포윈도우
-        var content = `<div class="infoWindow">${store?.upso_nm}</div>`
+        var content = `<div class="infoWindow">${store?.name}</div>`
         var customOverlay = new window.kakao.maps.CustomOverlay({
           position: markerPosition,
           content,
@@ -60,11 +54,11 @@ export default function Markers({
         })
       })
     }
-  }, [map, setCurrentStore, storeDatas])
+  }, [map, setCurrentStore, stores])
 
   useEffect(() => {
     loadKaKaoMarkers()
-  }, [loadKaKaoMarkers, map])
+  }, [loadKaKaoMarkers])
 
   return <></>
 }
