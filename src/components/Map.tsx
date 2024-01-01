@@ -1,19 +1,13 @@
 /*global kakao*/
 import Script from 'next/script'
-import { useEffect, Dispatch, SetStateAction } from 'react'
+import { useEffect } from 'react'
+import { useRecoilValue, useSetRecoilState } from 'recoil'
+import { locationState, mapState, placesState } from '@/atom'
 
 declare global {
   interface Window {
     kakao: any
   }
-}
-
-// 강남 좌표
-const DEFAULT_LAT = 37.497625203
-const DEFAULT_LNG = 127.03088379
-
-interface MapProps {
-  setMap: Dispatch<SetStateAction<any>>
 }
 
 /**
@@ -24,7 +18,11 @@ const setRootHeight = () => {
   root.style.setProperty('--window-height', `${window.innerHeight - 50}px`)
 }
 
-export default function Map({ setMap }: MapProps) {
+export default function Map() {
+  const setMap = useSetRecoilState(mapState)
+  const location = useRecoilValue(locationState)
+  const setPlaces = useSetRecoilState(placesState)
+
   useEffect(() => {
     setRootHeight()
     window.addEventListener('resize', setRootHeight)
@@ -39,11 +37,14 @@ export default function Map({ setMap }: MapProps) {
     window.kakao.maps.load(() => {
       const container = document.getElementById('map')
       const options = {
-        center: new window.kakao.maps.LatLng(DEFAULT_LAT, DEFAULT_LNG),
-        level: 3,
+        center: new window.kakao.maps.LatLng(location?.lat, location?.lng),
+        level: location.zoom,
       }
       const map = new window.kakao.maps.Map(container, options)
-
+      var ps = new window.kakao.maps.services.Places()
+      if (ps) {
+        setPlaces(ps)
+      }
       setMap(map)
     })
   }
@@ -53,10 +54,12 @@ export default function Map({ setMap }: MapProps) {
       <Script
         strategy='afterInteractive'
         type='text/javascript'
-        src={`//dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.NEXT_PUBLIC_KAKAO_MAP_CLIENT}&autoload=false`}
+        src={`//dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.NEXT_PUBLIC_KAKAO_MAP_CLIENT}&autoload=false&libraries=services,clusterer`}
         onReady={loadKakaoMap}
       />
-      <div id='map' className='w-full map'></div>
+      <div className='w-full'>
+        <div id='map' className='map'></div>
+      </div>
     </>
   )
 }

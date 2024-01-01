@@ -11,8 +11,36 @@ export interface StoreType {
 }
 
 export interface StoreApiResponse {
-  data: StoreType[]
+  data?: StoreType[]
   totalPage?: number
   totalCount?: number
   page?: number
+}
+
+export interface LocationType {
+  lat: number
+  lng: number
+  zoom: number
+}
+
+export interface searchResultType {
+  id: string
+  place_name: string
+  x?: string
+  y?: string
+  road_address_name?: string
+  address_name?: string
+  place_url?: string
+}
+
+export interface paginationType {
+  current: number
+  gotoFirst: () => {}
+  gotoLast: () => {}
+  gotoPage: (a: number) => {}
+  hasNextPage: boolean
+  hasPrevPage: boolean
+  last: number
+  nextPage: () => {}
+  prevPage: () => {}
 }
