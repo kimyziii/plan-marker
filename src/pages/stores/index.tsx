@@ -1,6 +1,6 @@
 import Loading from '@/components/Loading'
 import Pagination from '@/components/Pagination'
-import { StoreApiResponse, StoreType } from '@/interface'
+import { StoreApiResponse } from '@/interface'
 import axios from 'axios'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
