@@ -34,6 +34,10 @@
   height: var(--window-height);
 }
 
+.half-map {
+  height: calc(var(--window-height) / 2);
+}
+
 @media only screen and (max-width: 600px) {
   .navbar--mobile {
     @apply w-full h-fit fixed top-[50px] bg-blue-800 text-white;

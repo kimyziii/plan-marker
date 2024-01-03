@@ -1,4 +1,4 @@
-import Map from '@/components/Map'
+import { Map } from '@/components/Map'
 import Markers from '@/components/Markers'
 
 import StoreBox from '@/components/StoreBox'
@@ -12,7 +12,7 @@ interface HomeProps {
 export default function Home({ stores }: HomeProps) {
   return (
     <>
-      <Map />
+      <Map type='full' />
       {/* <Markers stores={stores} /> */}
       <StoreBox />
     </>
@@ -21,7 +21,6 @@ export default function Home({ stores }: HomeProps) {
 
 export async function getStaticProps() {
   const stores = await axios(`${process.env.NEXT_PUBLIC_API_URL}/api/stores`)
-
   return {
     props: { stores: stores.data },
     revalidate: 60 * 60,

@@ -31,6 +31,7 @@ export interface searchResultType {
   road_address_name?: string
   address_name?: string
   place_url?: string
+  category_name?: string
 }
 
 export interface paginationType {
