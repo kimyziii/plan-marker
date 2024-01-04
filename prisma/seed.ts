@@ -15,7 +15,6 @@ async function seedData() {
       storeType: store?.cob_code_nm,
       foodCertifyName: store?.crtfc_gbn_nm,
     }
-
     const res = await prisma.store.create({
       data: storeData,
     })
