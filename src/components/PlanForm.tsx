@@ -6,6 +6,7 @@ import { useEffect } from 'react'
 import { useState } from 'react'
 import { useSession } from 'next-auth/react'
 import axios from 'axios'
+import { useRouter } from 'next/router'
 
 interface PlanFormProps {
   markerData: Map<string, any>
@@ -22,13 +23,22 @@ export default function PlanForm({
   setPendingDatas,
   removeMarkers,
 }: PlanFormProps) {
+  const router = useRouter()
   const { data: session } = useSession()
   const [isPending, setIsPending] = useState<boolean>(false)
   const [title, setTitle] = useState<string>('')
+  const [isError, setIsError] = useState<boolean>(false)
 
   async function handleSave() {
+    // 제목이 입력되지 않은 경우
+    if (title.trim().length === 0) {
+      setIsError(true)
+
+      window.scrollTo(0, 0)
+      return
+    }
+
     const userId = await getUserId()
-    console.log(userId)
     const data = makeData()
 
     const createRes = await axios.post('/api/plan', {
@@ -37,7 +47,8 @@ export default function PlanForm({
       data,
     })
 
-    console.log(createRes)
+    const recordId = createRes.data.result.id
+    router.replace(`/plan/${recordId}`)
   }
 
   function makeData() {
@@ -55,7 +66,10 @@ export default function PlanForm({
   function handleInputChange(event, id) {
     const { name, value } = event.target
 
-    if (name === 'title') setTitle(value)
+    if (name === 'title') {
+      if (value.length > 0) setIsError(false)
+      setTitle(value)
+    }
     if (name === 'hour' || name === 'minute' || name === 'memo') {
       const newData = pendingDatas
       newData.forEach((data) => {
@@ -94,19 +108,28 @@ export default function PlanForm({
 
   return (
     <div>
-      <div className='flex justify-between my-3'>
-        <input
-          name='title'
-          className='w-[50%] bg-gray-100 rounded-md h-8 px-3 py-4 font-semibold text-base'
-          placeholder='제목을 입력해 주세요.'
-          onChange={(e) => {
-            handleInputChange(e, null)
-          }}
-        />
-
+      <div className='flex justify-between my-3 items-center'>
+        <div className='flex flex-col w-[50%] justify-center'>
+          <input
+            id='title'
+            name='title'
+            className={`w-full bg-gray-100 rounded-md h-8 px-3 py-4 font-semibold text-base ${
+              isError ? 'border-2 border-red-600' : ''
+            }`}
+            placeholder='제목을 입력해 주세요.'
+            onChange={(e) => {
+              handleInputChange(e, null)
+            }}
+          />
+          {isError && (
+            <span className='text-red-500 text-xs pt-2 pl-2'>
+              제목을 입력해 주세요.
+            </span>
+          )}
+        </div>
         <button
           onClick={clearMarkers}
-          className='text-xs bg-red-100 px-2 py-1 border border-red-300 rounded-md text-red-600 font-semibold'
+          className='text-xs bg-red-100 px-2 py-1 border border-red-300 rounded-md text-red-600 font-semibold h-[30px]'
         >
           전체삭제
         </button>
