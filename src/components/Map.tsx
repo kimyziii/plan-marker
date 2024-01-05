@@ -10,6 +10,10 @@ declare global {
   }
 }
 
+interface MapProps {
+  type?: string
+}
+
 /**
  * navbar의 높이만큼 뺀 높이로 지도 높이 설정
  */
@@ -18,7 +22,7 @@ const setRootHeight = () => {
   root.style.setProperty('--window-height', `${window.innerHeight - 50}px`)
 }
 
-export default function Map() {
+export function Map({ type }: MapProps) {
   const setMap = useSetRecoilState(mapState)
   const location = useRecoilValue(locationState)
   const setPlaces = useSetRecoilState(placesState)
@@ -57,9 +61,7 @@ export default function Map() {
         src={`//dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.NEXT_PUBLIC_KAKAO_MAP_CLIENT}&autoload=false&libraries=services,clusterer`}
         onReady={loadKakaoMap}
       />
-      <div className='w-full'>
-        <div id='map' className='map'></div>
-      </div>
+      <div id='map' className={`${type === 'half' ? 'half-map' : 'map'}`}></div>
     </>
   )
 }
