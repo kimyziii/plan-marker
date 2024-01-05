@@ -5,6 +5,29 @@ import { mapState } from '@/atom'
 import SearchSide from '@/components/SearchSide'
 import PlanForm from '@/components/PlanForm'
 
+/**
+ * 커스텀오버레이 인스턴스를 생성하여 리턴함
+ * @param place_name
+ * @param latlng
+ * @returns customOverlay
+ */
+export function createOverlay(place_name, latlng, map) {
+  var content =
+    '<div className="customoverlay" style="padding: 3px 8px; background-color: #EEF6FF; border-radius: 14px; border: 1px solid #EDF2FD; color: #2E5BDC; font-size: small;">' +
+    `    <span className="title">${place_name}</span>` +
+    '</div>'
+
+  var customOverlay = new window.kakao.maps.CustomOverlay({
+    map: map,
+    position: latlng,
+    content: content,
+    xAnchor: 0.5,
+    yAnchor: 0,
+  })
+
+  return customOverlay
+}
+
 export default function PlanNewPage() {
   const map = useRecoilValue(mapState)
 
@@ -28,7 +51,7 @@ export default function PlanNewPage() {
       image: markerImage,
     })
 
-    const customOverlay = createOverlay(data.place_name, latlng)
+    const customOverlay = createOverlay(data.place_name, latlng, map)
 
     window.kakao.maps.event.addListener(marker, 'mouseover', function () {
       marker.setZIndex(100)
@@ -52,29 +75,6 @@ export default function PlanNewPage() {
     )
     setPendingDatas((prevState) => [...prevState, data])
     showMarkers(map, marker)
-  }
-
-  /**
-   * 커스텀오버레이 인스턴스를 생성하여 리턴함
-   * @param place_name
-   * @param latlng
-   * @returns customOverlay
-   */
-  function createOverlay(place_name, latlng) {
-    var content =
-      '<div className="customoverlay" style="padding: 3px 8px; background-color: #EEF6FF; border-radius: 14px; border: 1px solid #EDF2FD; color: #2E5BDC; font-size: small;">' +
-      `    <span className="title">${place_name}</span>` +
-      '</div>'
-
-    var customOverlay = new window.kakao.maps.CustomOverlay({
-      map: map,
-      position: latlng,
-      content: content,
-      xAnchor: 0.5,
-      yAnchor: 0,
-    })
-
-    return customOverlay
   }
 
   /**
