@@ -116,14 +116,14 @@ export default function PlanForm({
             className={`w-full bg-gray-100 rounded-md h-8 px-3 py-4 font-semibold text-base ${
               isError ? 'border-2 border-red-600' : ''
             }`}
-            placeholder='제목을 입력해 주세요.'
+            placeholder='여행 경로 이름을 입력해 주세요.'
             onChange={(e) => {
               handleInputChange(e, null)
             }}
           />
           {isError && (
             <span className='text-red-500 text-xs pt-2 pl-2'>
-              제목을 입력해 주세요.
+              여행 경로 이름은 필수값입니다.
             </span>
           )}
         </div>

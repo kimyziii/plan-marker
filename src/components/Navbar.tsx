@@ -15,15 +15,11 @@ export default function Navbar() {
         <Link href='/'>App</Link>
       </div>
       <div className='navbar__list'>
-        <Link href='/plan/list' className='navbar__list--item'>
-          경로 리스트
-        </Link>
-        <Link href='/plan/new' className='navbar__list--item'>
-          경로 생성
-        </Link>
-        <Link href='/user/1/likes' className='navbar__list--item'>
-          찜한 경로
-        </Link>
+        {status === 'authenticated' && (
+          <Link href='/plan/new' className='navbar__list--item'>
+            경로 생성
+          </Link>
+        )}
         {/* <Link href='/api/auth/signin' className='navbar__list--item'>
           로그인
         </Link> */}
