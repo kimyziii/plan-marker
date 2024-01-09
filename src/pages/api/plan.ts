@@ -17,6 +17,20 @@ export default async function handler(
     return res.status(200).json({ ok: true, result: createdPlan })
   }
 
+  // DELETE
+  else if (req.method === 'DELETE') {
+    const {pId} = req.query
+    if (pId) {
+      const result = await prisma.plan.delete({
+        where: {
+          id: pId.toString(),
+        },
+      })
+      return res.status(200).json(result)
+    }
+    return res.status(500).json(null)
+  }
+
   // GET
   else if (req.method === 'GET') {
     const { uId, pId } = req.query
@@ -24,10 +38,9 @@ export default async function handler(
     let plans
 
     if (uId) {
-      const strUId = uId.toString()
       plans = await prisma.plan.findMany({
         where: {
-          createdById: strUId,
+          createdById: uId.toString()
         },
       })
     } else if (pId) {

@@ -94,7 +94,7 @@ export default function SearchSide({ handleSelect, removeMarkers }) {
                   <button
                     className='border rounded-md px-2 py-1 bg-red-100 border-red-300  text-red-600 font-semibold text-xs'
                     onClick={() => {
-                      removeMarkers(data)
+                      removeMarkers(data.id)
                     }}
                   >
                     삭제

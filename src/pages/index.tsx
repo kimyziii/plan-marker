@@ -3,6 +3,7 @@ import { useSession } from 'next-auth/react'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
+import { AiOutlineClose } from "react-icons/ai";
 
 type PlanType = {
   id: string
@@ -60,6 +61,14 @@ export default function Home() {
     setPlans(newPlans)
   }
 
+  async function handleRemovePlan(planId: string) {
+   const confirm = window.confirm('해당 경로를 삭제하시겠습니까?')
+   if (confirm) {
+    const result = await axios.delete(`/api/plan?pId=${planId}`)
+    if (result.status === 200) router.replace('/')
+   }
+  }
+
   useEffect(() => {
     getUserId()
   }, [])
@@ -71,7 +80,7 @@ export default function Home() {
   return (
     <div className='w-[85%] flex flex-col place-items-center mx-auto'>
       <div className='w-full mt-10 flex justify-between items-end'>
-        <div className='text-2xl text-gray-600 font-bold'>나의 여행경로</div>
+        <div className='text-2xl text-gray-600 font-semibold'>나의 여행경로</div>
         <div
           className='flex flex-col items-center justify-end gap-1 cursor-pointer'
           onClick={() => {
@@ -79,7 +88,7 @@ export default function Home() {
           }}
         >
           <div className='relative inline-block text-left'>
-            <button className='inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50'>
+            <button className='inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-base text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50'>
               정렬
               <Image
                 src='/icons/bars-arrow-down.svg'
@@ -127,10 +136,15 @@ export default function Home() {
               key={plan.id}
               className='w-full border rounded-md flex flex-col'
             >
-              <div className='px-5 py-4'>
-                <div className='text-lg font-semibold'>{plan.title}</div>
-                <div className='text-gray-500 text-sm'>
-                  {new Date(plan.createdAt).toLocaleString('ko-KR')}
+              <div className='px-5 py-4 flex justify-between items-start'>
+                <div>
+                  <div className='text-lg font-semibold'>{plan.title}</div>
+                  <div className='text-gray-500 text-sm'>
+                    {new Date(plan.createdAt).toLocaleString('ko-KR')}
+                  </div>
+                </div>
+                <div className='cursor-pointer' onClick={() => handleRemovePlan(plan.id)}>
+                  <AiOutlineClose />
                 </div>
               </div>
               <div
@@ -146,7 +160,7 @@ export default function Home() {
           ))}
       </div>
       {isNull && (
-        <div className='w-full flex justify-center px-8 py-20 border border-gray-200 rounded-md '>
+        <div className='nanum text-base w-full flex justify-center px-8 py-20 border border-gray-200 rounded-md'>
           데이터가 없습니다.
         </div>
       )}
