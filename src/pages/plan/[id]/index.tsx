@@ -3,20 +3,29 @@ import { Map } from '@/components/Map'
 import axios from 'axios'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
+import { useState } from 'react'
 import { useQuery } from 'react-query'
 import { useRecoilValue } from 'recoil'
 
 export default function PlanDetailPage() {
   const { id } = useRouter().query
   const map = useRecoilValue(mapState)
+  const [isNull, setIsNull] = useState<boolean>(false)
 
   const { data } = useQuery(
     `plan-${id}`,
     async () => {
       const { data } = await axios(`/api/plan?pId=${id}`)
-      const markerData = JSON.parse(data.plans[0].data)
+      if (data.plans.length > 0) {
+        const markerData = JSON.parse(data?.plans[0].data)
+        setIsNull(false)
+        
+        return { plan: data.plans[0], markerData: markerData }
+      } else {
+        setIsNull(true)
+        return null
+      }
 
-      return { plan: data.plans[0], markerData: markerData }
     },
     {
       refetchOnWindowFocus: false,
@@ -24,7 +33,7 @@ export default function PlanDetailPage() {
     },
   )
 
-  if (data && map) {
+  if (!isNull && data && map) {
     getMap()
   }
 
@@ -110,7 +119,7 @@ export default function PlanDetailPage() {
             </div>
           </div>
           <div className='flex gap-4'>
-            <div className='w-1/3 overflow-hidden'>
+            <div className='w-2/5 overflow-hidden'>
               {/* 지도 */}
               <div className='w-full mx-4 px-4 h-[75vh]' id='map'>
                 <Map type='full' />
@@ -118,7 +127,7 @@ export default function PlanDetailPage() {
             </div>
 
             {/* 장소 정보 */}
-            <div className='w-2/3'>
+            <div className='w-3/5'>
               <table className='w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400 mb-3'>
                 <thead className='text-xs text-gray-700 bg-gray-50 dark:bg-gray-700 dark:text-gray-400'>
                   <tr>
@@ -163,6 +172,9 @@ export default function PlanDetailPage() {
           </div>
         </div>
       )}
+      {isNull && <><div className='py-20 text-sm flex flex-col justify-center items-center'>
+        <span>해당 경로를 찾을 수 없습니다.</span><span> 다시 시도해주세요.</span>
+        </div></>}
     </div>
   )
 }

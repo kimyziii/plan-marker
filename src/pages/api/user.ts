@@ -15,6 +15,7 @@ export default async function handler(
         email: userEmail,
       },
     })
-    res.json({ status: '200', result })
+
+    return res.status(200).json({result})
   }
 }
