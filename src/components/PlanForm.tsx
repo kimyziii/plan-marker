@@ -113,7 +113,7 @@ export default function PlanForm({
           <input
             id='title'
             name='title'
-            className={`w-full bg-gray-100 rounded-md h-8 px-3 py-4 font-semibold text-base ${
+            className={`w-full bg-gray-100 rounded-md h-8 px-3 py-4 font-normal text-base ${
               isError ? 'border-2 border-red-600' : ''
             }`}
             placeholder='여행 경로 이름을 입력해 주세요.'
@@ -129,7 +129,7 @@ export default function PlanForm({
         </div>
         <button
           onClick={clearMarkers}
-          className='text-xs bg-red-100 px-2 py-1 border border-red-300 rounded-md text-red-600 font-semibold h-[30px]'
+          className='text-sm bg-red-100 px-2 py-1 border border-red-300 rounded-md text-red-600 font-semibold h-[30px]'
         >
           전체삭제
         </button>

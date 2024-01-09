@@ -137,7 +137,7 @@ export default function PlanNewPage() {
   return (
     <div className='flex w-full'>
       <div className='w-1/3 p-4 rounded-md flex flex-col gap-2'>
-        <div className='mx-2 text-xl text-blue-800 font-bold'>
+        <div className='mx-2 text-xl text-blue-800 font-semibold'>
           장소 검색하기
         </div>
         <SearchSide handleSelect={handleSelect} removeMarkers={removeMarkers} />

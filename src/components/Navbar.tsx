@@ -11,10 +11,10 @@ export default function Navbar() {
 
   return (
     <div className='navbar'>
-      <div className='navbar__logo'>
-        <Link href='/'>App</Link>
+      <div className='navbar__logo italic'>
+        <Link href='/'>Markers</Link>
       </div>
-      <div className='navbar__list'>
+      <div className='navbar__list nanum'>
         {status === 'authenticated' && (
           <Link href='/plan/new' className='navbar__list--item'>
             경로 생성
