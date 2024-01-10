@@ -65,7 +65,7 @@ export default function Home() {
    const confirm = window.confirm('해당 경로를 삭제하시겠습니까?')
    if (confirm) {
     const result = await axios.delete(`/api/plan?pId=${planId}`)
-    if (result.status === 200) router.replace('/')
+    if (result.status === 200) router.reload()
    }
   }
 

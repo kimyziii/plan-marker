@@ -2,7 +2,7 @@ import { mapState } from '@/atom'
 import { Map } from '@/components/Map'
 import axios from 'axios'
 import Image from 'next/image'
-import { useRouter } from 'next/router'
+import router, { useRouter } from 'next/router'
 import { useState } from 'react'
 import { useQuery } from 'react-query'
 import { useRecoilValue } from 'recoil'
@@ -36,6 +36,14 @@ export default function PlanDetailPage() {
   if (!isNull && data && map) {
     getMap()
   }
+
+  async function handleRemovePlan() {
+    const confirm = window.confirm('해당 경로를 삭제하시겠습니까?')
+    if (confirm) {
+     const result = await axios.delete(`/api/plan?pId=${id}`)
+     if (result.status === 200) router.replace('/')
+    }
+   }
 
   function getMap() {
     // 마커 작업
@@ -89,33 +97,39 @@ export default function PlanDetailPage() {
       {data && (
         <div className='w-full flex flex-col gap-4'>
           {/* 제목, 작성자, 작성일자 */}
-          <div className='w-full mx-4 my-5 h-[6vh]'>
-            <div className='flex flex-col gap-2'>
-              <div className='text-2xl font-bold leading-7 text-gray-900'>
-                {data.plan?.title}
-              </div>
-              <div className='flex flex-row items-center text-sm text-gray-500 gap-4'>
-                <div className='flex flex-row items-center gap-2'>
-                  <Image
-                    src='/icons/user.svg'
-                    alt='생성일자'
-                    width='18'
-                    height='18'
-                  />
-                  <span>{data.plan?.user.name}</span>
+          <div className='w-full flex flex-row items-center justify-between'>
+            <div className='w-full mx-4 my-5 h-[6vh]'>
+              <div className='flex flex-col gap-2'>
+                <div className='text-2xl font-bold leading-7 text-gray-900'>
+                  {data.plan?.title}
                 </div>
-                <div className='flex flex-row items-center gap-2'>
-                  <Image
-                    src='/icons/calendar.svg'
-                    alt='생성일자'
-                    width='18'
-                    height='18'
-                  />
-                  <span>
-                    {new Date(data.plan?.createdAt).toLocaleString('ko-KR')}
-                  </span>
+                <div className='flex flex-row items-center text-sm text-gray-500 gap-4'>
+                  <div className='flex flex-row items-center gap-2'>
+                    <Image
+                      src='/icons/user.svg'
+                      alt='생성일자'
+                      width='18'
+                      height='18'
+                    />
+                    <span>{data.plan?.user.name}</span>
+                  </div>
+                  <div className='flex flex-row items-center gap-2'>
+                    <Image
+                      src='/icons/calendar.svg'
+                      alt='생성일자'
+                      width='18'
+                      height='18'
+                    />
+                    <span>
+                      {new Date(data.plan?.createdAt).toLocaleString('ko-KR')}
+                    </span>
+                  </div>
                 </div>
               </div>
+            </div>
+            <div className='w-[20%] flex flex-row justify-end gap-2' >
+              <button className='text-sm bg-blue-100 px-2 py-1 border border-blue-300 rounded-md text-blue-600 font-semibold h-[30px]' onClick={() => router.replace(`/plan/edit/${id}`)}>수정</button>
+              <button className='text-sm bg-red-100 px-2 py-1 border border-red-300 rounded-md text-red-600 font-semibold h-[30px]' onClick={handleRemovePlan}>삭제</button>
             </div>
           </div>
           <div className='flex gap-4'>

@@ -9,7 +9,7 @@ import axios from 'axios'
 import { useRouter } from 'next/router'
 
 interface PlanFormProps {
-  markerData: Map<string, any>
+  markerData ?: Map<string, any>
   pendingDatas: any[]
   setMarkerData: Dispatch<SetStateAction<any>>
   setPendingDatas: Dispatch<SetStateAction<any[]>>
