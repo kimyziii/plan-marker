@@ -19,13 +19,12 @@ export default function PlanDetailPage() {
       if (data.plans.length > 0) {
         const markerData = JSON.parse(data?.plans[0].data)
         setIsNull(false)
-        
+
         return { plan: data.plans[0], markerData: markerData }
       } else {
         setIsNull(true)
         return null
       }
-
     },
     {
       refetchOnWindowFocus: false,
@@ -40,10 +39,10 @@ export default function PlanDetailPage() {
   async function handleRemovePlan() {
     const confirm = window.confirm('해당 경로를 삭제하시겠습니까?')
     if (confirm) {
-     const result = await axios.delete(`/api/plan?pId=${id}`)
-     if (result.status === 200) router.replace('/')
+      const result = await axios.delete(`/api/plan?pId=${id}`)
+      if (result.status === 200) router.replace('/')
     }
-   }
+  }
 
   function getMap() {
     // 마커 작업
@@ -127,9 +126,14 @@ export default function PlanDetailPage() {
                 </div>
               </div>
             </div>
-            <div className='w-[20%] flex flex-row justify-end gap-2' >
-              <button className='text-sm bg-blue-100 px-2 py-1 border border-blue-300 rounded-md text-blue-600 font-semibold h-[30px]' onClick={() => router.replace(`/plan/edit/${id}`)}>수정</button>
-              <button className='text-sm bg-red-100 px-2 py-1 border border-red-300 rounded-md text-red-600 font-semibold h-[30px]' onClick={handleRemovePlan}>삭제</button>
+            <div className='w-[20%] flex flex-row justify-end gap-2'>
+              {/* <button className='text-sm bg-blue-100 px-2 py-1 border border-blue-300 rounded-md text-blue-600 font-semibold h-[30px]' onClick={() => router.replace(`/plan/edit/${id}`)}>수정</button> */}
+              <button
+                className='text-sm bg-red-100 px-2 py-1 border border-red-300 rounded-md text-red-600 font-semibold h-[30px]'
+                onClick={handleRemovePlan}
+              >
+                삭제
+              </button>
             </div>
           </div>
           <div className='flex gap-4'>
@@ -186,9 +190,14 @@ export default function PlanDetailPage() {
           </div>
         </div>
       )}
-      {isNull && <><div className='py-20 text-sm flex flex-col justify-center items-center'>
-        <span>해당 경로를 찾을 수 없습니다.</span><span> 다시 시도해주세요.</span>
-        </div></>}
+      {isNull && (
+        <>
+          <div className='py-20 text-sm flex flex-col justify-center items-center'>
+            <span>해당 경로를 찾을 수 없습니다.</span>
+            <span> 다시 시도해주세요.</span>
+          </div>
+        </>
+      )}
     </div>
   )
 }

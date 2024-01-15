@@ -7,9 +7,11 @@ import { useState } from 'react'
 import { useSession } from 'next-auth/react'
 import axios from 'axios'
 import { useRouter } from 'next/router'
+import Image from 'next/image'
+import Alert from '@mui/material/Alert'
 
 interface PlanFormProps {
-  markerData ?: Map<string, any>
+  markerData?: Map<string, any>
   pendingDatas: any[]
   setMarkerData: Dispatch<SetStateAction<any>>
   setPendingDatas: Dispatch<SetStateAction<any[]>>
@@ -28,6 +30,7 @@ export default function PlanForm({
   const [isPending, setIsPending] = useState<boolean>(false)
   const [title, setTitle] = useState<string>('')
   const [isError, setIsError] = useState<boolean>(false)
+  const [alert, setAlert] = useState<boolean>(false)
 
   async function handleSave() {
     // 제목이 입력되지 않은 경우
@@ -47,7 +50,7 @@ export default function PlanForm({
       data,
     })
 
-    const recordId = createRes.data.result.id
+    const recordId = createRes.data?.result.id
     router.replace(`/plan/${recordId}`)
   }
 
@@ -59,7 +62,7 @@ export default function PlanForm({
   async function getUserId() {
     const userEmail = session.user.email
     const userRes = await axios(`/api/user?email=${userEmail}`)
-    const userId = userRes.data.result.id
+    const userId = userRes.data?.result.id
     return userId
   }
 
@@ -73,11 +76,11 @@ export default function PlanForm({
     if (name === 'hour' || name === 'minute' || name === 'memo') {
       const newData = pendingDatas
       newData.forEach((data) => {
-        if (data.id === id && name === 'hour') {
+        if (data?.id === id && name === 'hour') {
           data.hour = value
-        } else if (data.id === id && name === 'minute') {
+        } else if (data?.id === id && name === 'minute') {
           data.minute = value
-        } else if (data.id === id && name === 'memo') {
+        } else if (data?.id === id && name === 'memo') {
           data.memo = value
         }
       })
@@ -99,6 +102,42 @@ export default function PlanForm({
     setMarkerData(newMap)
     setIsPending(false)
     setPendingDatas([])
+  }
+
+  function handleUp(idx: number) {
+    if (idx === 0) {
+      setAlert(true)
+      setTimeout(() => {
+        setAlert(false)
+      }, 2000)
+      return
+    }
+
+    let arr = [...pendingDatas]
+
+    let temp = arr[idx]
+    arr[idx] = arr[idx - 1]
+    arr[idx - 1] = temp
+
+    setPendingDatas(arr)
+  }
+
+  function handleDown(idx: number) {
+    if (idx === pendingDatas.length - 1) {
+      setAlert(true)
+      setTimeout(() => {
+        setAlert(false)
+      }, 2000)
+      return
+    }
+
+    let arr = [...pendingDatas]
+
+    let temp = arr[idx]
+    arr[idx] = arr[idx + 1]
+    arr[idx + 1] = temp
+
+    setPendingDatas(arr)
   }
 
   useEffect(() => {
@@ -135,8 +174,15 @@ export default function PlanForm({
         </button>
       </div>
       <MapComponent type='half' />
+
+      {alert && (
+        <div className='mt-3'>
+          <Alert severity='warning'>순서를 변경할 수 없습니다.</Alert>
+        </div>
+      )}
+
       {isPending && (
-        <div className='relative overflow-x-auto my-3'>
+        <div className='overflow-x-auto my-3'>
           <table className='w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400 mb-3'>
             <thead className='text-xs text-gray-700 bg-gray-50 dark:bg-gray-700 dark:text-gray-400'>
               <tr>
@@ -153,6 +199,9 @@ export default function PlanForm({
                   메모
                 </th>
                 <th scope='col' className='px-3 py-3 text-center'>
+                  변경
+                </th>
+                <th scope='col' className='px-3 py-3 text-center'>
                   삭제
                 </th>
               </tr>
@@ -160,7 +209,7 @@ export default function PlanForm({
             <tbody>
               {pendingDatas.map((data, index) => (
                 <tr
-                  key={data.id}
+                  key={data?.id}
                   className='bg-white border-b dark:bg-gray-800 dark:border-gray-700'
                 >
                   <th
@@ -175,29 +224,55 @@ export default function PlanForm({
                   >
                     <input
                       name='hour'
-                      onChange={(e) => handleInputChange(e, data.id)}
+                      onChange={(e) => handleInputChange(e, data?.id)}
                       className='w-[40%] mr-1 text-center bg-blue-100 rounded-md py-[6px]'
                       placeholder='시'
                     ></input>
                     <input
                       name='minute'
-                      onChange={(e) => handleInputChange(e, data.id)}
+                      onChange={(e) => handleInputChange(e, data?.id)}
                       className='w-[40%] text-center bg-blue-100 rounded-md py-[6px]'
                       placeholder='분'
                     ></input>
                   </td>
-                  <td className='px-2 py-2 w-[15%]'>{data.place_name}</td>
-                  <td className='px-2 py-2  w-[50%] min-h-12'>
+                  <td className='px-2 py-2 w-[15%]'>{data?.place_name}</td>
+                  <td className='px-2 py-2  w-[43%] min-h-12'>
                     <textarea
                       name='memo'
-                      onChange={(e) => handleInputChange(e, data.id)}
+                      onChange={(e) => handleInputChange(e, data?.id)}
                       className='bg-blue-100 rounded-md w-full h-fit px-2 py-2 resize-none'
                     />
+                  </td>
+                  <td className='px-2 py-2 w-[7%]'>
+                    <div className='flex flex-col justify-center items-center gap-1'>
+                      <div
+                        className='border p-1 rounded-md cursor-pointer'
+                        onClick={() => handleUp(index)}
+                      >
+                        <Image
+                          src='/icons/arrow-up.svg'
+                          width='20'
+                          height='20'
+                          alt='순서 올리기'
+                        />
+                      </div>
+                      <div
+                        className='border p-1 rounded-md cursor-pointer'
+                        onClick={() => handleDown(index)}
+                      >
+                        <Image
+                          src='/icons/arrow-down.svg'
+                          width='20'
+                          height='20'
+                          alt='순서 내리기'
+                        />
+                      </div>
+                    </div>
                   </td>
                   <td
                     className='px-2 py-4 w-[7%]'
                     onClick={() => {
-                      removeMarkers(data.id)
+                      removeMarkers(data?.id)
                     }}
                   >
                     <div className='flex justify-center'>

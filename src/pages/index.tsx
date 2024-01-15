@@ -3,7 +3,7 @@ import { useSession } from 'next-auth/react'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
-import { AiOutlineClose } from "react-icons/ai";
+import { AiOutlineClose } from 'react-icons/ai'
 
 type PlanType = {
   id: string
@@ -62,11 +62,11 @@ export default function Home() {
   }
 
   async function handleRemovePlan(planId: string) {
-   const confirm = window.confirm('해당 경로를 삭제하시겠습니까?')
-   if (confirm) {
-    const result = await axios.delete(`/api/plan?pId=${planId}`)
-    if (result.status === 200) router.reload()
-   }
+    const confirm = window.confirm('해당 경로를 삭제하시겠습니까?')
+    if (confirm) {
+      const result = await axios.delete(`/api/plan?pId=${planId}`)
+      if (result.status === 200) router.reload()
+    }
   }
 
   useEffect(() => {
@@ -80,7 +80,9 @@ export default function Home() {
   return (
     <div className='w-[85%] flex flex-col place-items-center mx-auto'>
       <div className='w-full mt-10 flex justify-between items-end'>
-        <div className='text-2xl text-gray-600 font-semibold'>나의 여행경로</div>
+        <div className='text-2xl text-gray-600 font-semibold'>
+          나의 여행경로
+        </div>
         <div
           className='flex flex-col items-center justify-end gap-1 cursor-pointer'
           onClick={() => {
@@ -143,7 +145,10 @@ export default function Home() {
                     {new Date(plan.createdAt).toLocaleString('ko-KR')}
                   </div>
                 </div>
-                <div className='cursor-pointer' onClick={() => handleRemovePlan(plan.id)}>
+                <div
+                  className='cursor-pointer'
+                  onClick={() => handleRemovePlan(plan.id)}
+                >
                   <AiOutlineClose />
                 </div>
               </div>
@@ -160,7 +165,7 @@ export default function Home() {
           ))}
       </div>
       {isNull && (
-        <div className='nanum text-base w-full flex justify-center px-8 py-20 border border-gray-200 rounded-md'>
+        <div className='text-base w-full flex justify-center px-8 py-20 border border-gray-200 rounded-md'>
           데이터가 없습니다.
         </div>
       )}

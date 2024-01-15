@@ -14,7 +14,7 @@ export default function Navbar() {
       <div className='navbar__logo italic'>
         <Link href='/'>Markers</Link>
       </div>
-      <div className='navbar__list nanum'>
+      <div className='navbar__list'>
         {status === 'authenticated' && (
           <Link href='/plan/new' className='navbar__list--item'>
             경로 생성

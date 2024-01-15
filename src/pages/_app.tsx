@@ -6,6 +6,11 @@ import { ReactQueryDevtools } from 'react-query/devtools'
 import { SessionProvider } from 'next-auth/react'
 import { RecoilRoot } from 'recoil'
 
+import '@fontsource/roboto/300.css'
+import '@fontsource/roboto/400.css'
+import '@fontsource/roboto/500.css'
+import '@fontsource/roboto/700.css'
+
 const queryClient = new QueryClient()
 export default function App({
   Component,
