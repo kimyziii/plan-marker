@@ -1,40 +1,56 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# 🗺 Markers: 여행 계획 짜기 애플리케이션
 
-## Getting Started
+여행을 가기 전, 혹은 부모님의 여행 일정을 짜던 중 
+간단하게 코스를 만들어서 공유할 수 있는 방법이 없어 만들어 보았습니다.
 
-First, run the development server:
+엑셀로 계획표를 만들면 지도를 첨부할 수 없어 경로를 확인할 수 없고, 
+지도에 표시하자니 시간이나 메모를 추가로 넣을 수가 없었습니다.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+그래서 지도를 넣어 위치를 알 수 있도록 하고 도착 시간이나 추가적인 메모를 기재할 수 있도록 했습니다.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+<br/>
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+# 로그인하기
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+가장 첫 화면은 나만의 경로를 관리할 수 있도록 로그인 화면으로 설정했습니다.
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+Next.js의 Auth 기능을 통해서 구글 로그인을 연동하였으며
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+가입된 정보가 없을 시 자동으로 회원가입이 되도록 하였습니다.
 
-## Learn More
+<br/>
 
-To learn more about Next.js, take a look at the following resources:
+# 여행경로 리스트
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+로그인에 성공하면 첫번째로 보이는 화면입니다.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+내가 만든 여행경로를 리스트로 확인할 수 있으며 X 버튼을 눌러 삭제할 수 있습니다.
 
-## Deploy on Vercel
+생성일자 혹은 여행경로 이름으로 정렬을 할 수 있습니다.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+상세보기 버튼을 눌러 디테일 페이지로 이동합니다.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+<br/>
+
+# 여행경로 상세페이지
+
+만든 여행경로를 상세하게 볼 수 있습니다.
+
+내가 설정한 시간과 메모, 지도에 표시된 마커를 통해서 한 눈에 경로를 확인할 수 있습니다.
+
+<br/>
+
+# 경로 생성 페이지
+
+여행경로를 새로 생성합니다.
+
+장소 검색창에 장소명 혹은 키워드를 입력한 후 추가 버튼을 눌러 지도에 마커를 추가합니다.
+해당 위치가 아니라고 확인되면 삭제 버튼을 눌러 마커를 삭제합니다.
+
+혹은 리스트에 있는 삭제 버튼을 눌러 장소를 삭제합니다.
+제목 옆 전체삭제 버튼을 누르면 모든 장소를 삭제합니다.
+
+여행 경로의 이름과 각 장소에 시간 및 메모를 추가합니다.
+
+모든 정보를 입력했다면 저장 버튼을 누릅니다. 
+저장에 성공할 경우 해당 경로의 상세 페이지로 넘어갑니다.
