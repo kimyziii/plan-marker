@@ -10,6 +10,8 @@ import { useRouter } from 'next/router'
 import Image from 'next/image'
 import Alert from '@mui/material/Alert'
 
+type MarkerData = {}
+
 interface PlanFormProps {
   markerData?: Map<string, any>
   pendingDatas: any[]

@@ -2,8 +2,9 @@ import axios from 'axios'
 import { useSession } from 'next-auth/react'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { AiOutlineClose } from 'react-icons/ai'
+import { isDeepStrictEqual } from 'util'
 
 type PlanType = {
   id: string
@@ -24,7 +25,7 @@ export default function Home() {
   const [isNull, setIsNull] = useState<boolean>(false)
   const [plans, setPlans] = useState<PlanType[]>([])
 
-  async function getUserId() {
+  const getUserId = useCallback(async () => {
     if (session) {
       const userEmail = session?.user.email
       const userRes = await axios(`/api/user?email=${userEmail}`)
@@ -33,7 +34,7 @@ export default function Home() {
     } else {
       router.replace('/login')
     }
-  }
+  }, [router, session])
 
   async function getPlans(userId) {
     const res = await axios(`/api/plan?uId=${userId}`)
@@ -49,7 +50,7 @@ export default function Home() {
     }
   }
 
-  function sortPlans() {
+  const sortPlans = useCallback(() => {
     const newPlans = [...plans]
 
     if (sorting === '생성일자') {
@@ -59,7 +60,7 @@ export default function Home() {
     }
 
     setPlans(newPlans)
-  }
+  }, [sorting])
 
   async function handleRemovePlan(planId: string) {
     const confirm = window.confirm('해당 경로를 삭제하시겠습니까?')
@@ -71,7 +72,7 @@ export default function Home() {
 
   useEffect(() => {
     getUserId()
-  }, [])
+  }, [getUserId])
 
   useEffect(() => {
     sortPlans()

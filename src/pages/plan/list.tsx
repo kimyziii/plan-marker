@@ -2,7 +2,7 @@ import axios from 'axios'
 import { useSession } from 'next-auth/react'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 type PlanType = {
   id: string
@@ -23,7 +23,7 @@ export default function PlanListPage() {
   const [isNull, setIsNull] = useState<boolean>(false)
   const [plans, setPlans] = useState<PlanType[]>([])
 
-  async function getUserId() {
+  const getUserId = useCallback(async () => {
     if (session) {
       const userEmail = session?.user.email
       const userRes = await axios(`/api/user?email=${userEmail}`)
@@ -32,7 +32,7 @@ export default function PlanListPage() {
     } else {
       router.replace('/login')
     }
-  }
+  }, [session, router])
 
   async function getPlans(userId) {
     const res = await axios(`/api/plan?uId=${userId}`)
@@ -45,7 +45,7 @@ export default function PlanListPage() {
     }
   }
 
-  function sortPlans() {
+  const sortPlans = useCallback(() => {
     const newPlans = [...plans]
 
     if (sorting === '생성일자') {
@@ -55,15 +55,15 @@ export default function PlanListPage() {
     }
 
     setPlans(newPlans)
-  }
+  }, [sorting, plans])
 
   useEffect(() => {
     getUserId()
-  }, [])
+  }, [getUserId])
 
   useEffect(() => {
     sortPlans()
-  }, [sorting])
+  }, [sorting, sortPlans])
 
   return (
     <div className='w-[85%] flex flex-col place-items-center mx-auto'>
