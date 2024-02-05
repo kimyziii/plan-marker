@@ -1,13 +1,15 @@
+import { sessionState } from '@/atom'
+import { selectAuth } from '@/redux/slice/authSlice'
 import axios from 'axios'
 import { useSession } from 'next-auth/react'
 import Image from 'next/image'
-import { useRouter } from 'next/router'
+import Router, { useRouter } from 'next/router'
 import { useCallback, useEffect, useState } from 'react'
 import { AiOutlineClose } from 'react-icons/ai'
-import { isDeepStrictEqual } from 'util'
+import { useSelector } from 'react-redux'
 
 type PlanType = {
-  id: string
+  _id: string
   title: string
   data: string
   createdAt: string
@@ -17,38 +19,32 @@ type PlanType = {
 
 export default function Home() {
   const router = useRouter()
-  const { data: session } = useSession()
+  const auth = useSelector(selectAuth)
+
+  async function getPlans() {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/plans/${auth.mid}`,
+      {
+        method: 'GET',
+        credentials: 'include',
+      },
+    )
+    const data = await response.json()
+
+    if (data.length === 0) {
+      setIsNull(true)
+      return
+    }
+
+    setPlans(data.sort((a, b) => b.createdAt.localeCompare(a.createdAt)))
+  }
+
   const sortingFilter: string[] = ['생성일자', '이름']
 
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const [sorting, setSorting] = useState<string>(sortingFilter[0])
   const [isNull, setIsNull] = useState<boolean>(false)
   const [plans, setPlans] = useState<PlanType[]>([])
-
-  const getUserId = useCallback(async () => {
-    if (session) {
-      const userEmail = session?.user.email
-      const userRes = await axios(`/api/user?email=${userEmail}`)
-      const userId = userRes.data.result.id
-      getPlans(userId)
-    } else {
-      router.replace('/login')
-    }
-  }, [router, session])
-
-  async function getPlans(userId) {
-    const res = await axios(`/api/plan?uId=${userId}`)
-
-    if (res.data) {
-      if (res.data.plans.length === 0) {
-        setIsNull(true)
-        return
-      }
-      const plansData = res.data.plans
-      plansData.sort((a, b) => b.createdAt.localeCompare(a.createdAt))
-      setPlans(plansData)
-    }
-  }
 
   const sortPlans = useCallback(() => {
     const newPlans = [...plans]
@@ -65,18 +61,23 @@ export default function Home() {
   async function handleRemovePlan(planId: string) {
     const confirm = window.confirm('해당 경로를 삭제하시겠습니까?')
     if (confirm) {
-      const result = await axios.delete(`/api/plan?pId=${planId}`)
-      if (result.status === 200) router.reload()
+      // const result = await axios.delete(`/api/plan?pId=${planId}`)
+      // if (result.status === 200) router.reload()
     }
   }
 
-  useEffect(() => {
-    getUserId()
-  }, [getUserId])
+  // useEffect(() => {
+  //   getUserId()
+  // }, [getUserId])
 
   useEffect(() => {
     sortPlans()
   }, [sorting])
+
+  useEffect(() => {
+    if (!auth.isLoggedIn) router.push('/login')
+    if (auth.mid) getPlans()
+  }, [auth])
 
   return (
     <div className='w-[85%] flex flex-col place-items-center mx-auto'>
@@ -136,7 +137,7 @@ export default function Home() {
         {!isNull &&
           plans.map((plan) => (
             <div
-              key={plan.id}
+              key={plan._id}
               className='w-full border rounded-md flex flex-col'
             >
               <div className='px-5 py-4 flex justify-between items-start'>
@@ -148,7 +149,7 @@ export default function Home() {
                 </div>
                 <div
                   className='cursor-pointer'
-                  onClick={() => handleRemovePlan(plan.id)}
+                  onClick={() => handleRemovePlan(plan._id)}
                 >
                   <AiOutlineClose />
                 </div>
@@ -156,7 +157,7 @@ export default function Home() {
               <div
                 className='bg-blue-100 text-center text-sm py-2 text-blue-600 font-semibold cursor-pointer'
                 onClick={() => {
-                  router.push(`/plan/${plan.id}`)
+                  router.push(`/plan/${plan._id}`)
                 }}
                 role='presentation'
               >

@@ -5,11 +5,10 @@ import { QueryClient, QueryClientProvider } from 'react-query'
 import { ReactQueryDevtools } from 'react-query/devtools'
 import { SessionProvider } from 'next-auth/react'
 import { RecoilRoot } from 'recoil'
+import { persistor } from '@/redux/store'
 
-import '@fontsource/roboto/300.css'
-import '@fontsource/roboto/400.css'
-import '@fontsource/roboto/500.css'
-import '@fontsource/roboto/700.css'
+import Providers from '@/redux/provider'
+import { PersistGate } from 'redux-persist/integration/react'
 
 const queryClient = new QueryClient()
 export default function App({
@@ -17,15 +16,25 @@ export default function App({
   pageProps: { session, ...pageProps },
 }: AppProps) {
   return (
-    <RecoilRoot>
-      <QueryClientProvider client={queryClient}>
-        <SessionProvider session={session}>
-          <Layout>
-            <Component {...pageProps} />
-          </Layout>
-          <ReactQueryDevtools />
-        </SessionProvider>
-      </QueryClientProvider>
-    </RecoilRoot>
+    // <RecoilRoot>
+    //   <QueryClientProvider client={queryClient}>
+    //     <SessionProvider session={session}>
+    // <RecoilRoot>
+    <Providers>
+      <PersistGate loading={null} persistor={persistor}>
+        <RecoilRoot>
+          <QueryClientProvider client={queryClient}>
+            <Layout>
+              <Component {...pageProps} />
+            </Layout>
+          </QueryClientProvider>
+        </RecoilRoot>
+      </PersistGate>
+    </Providers>
+    // </RecoilRoot>
+    //       <ReactQueryDevtools />
+    //     </SessionProvider>
+    //   </QueryClientProvider>
+    // </RecoilRoot>
   )
 }

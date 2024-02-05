@@ -4,6 +4,8 @@ import { mapState } from '@/atom'
 
 import SearchSide from '@/components/SearchSide'
 import PlanForm from '@/components/PlanForm'
+import { useSelector } from 'react-redux'
+import { selectMap } from '@/redux/slice/mapSlice'
 
 /**
  * 커스텀오버레이 인스턴스를 생성하여 리턴함
@@ -30,6 +32,7 @@ export function createOverlay(place_name, latlng, map) {
 
 export default function PlanNewPage() {
   const map = useRecoilValue(mapState)
+  // const map = useSelector(selectMap)
 
   const [pendingDatas, setPendingDatas] = useState<any[]>([])
   const [markerData, setMarkerData] = useState(new Map<string, any>(null))

@@ -1,3 +1,9 @@
+export interface UserType {
+  email: string
+  providerId: string
+  uid: string
+}
+
 export interface StoreType {
   id: number
   phone?: string | null

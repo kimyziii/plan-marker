@@ -3,6 +3,8 @@ import Script from 'next/script'
 import { useEffect } from 'react'
 import { useRecoilValue, useSetRecoilState } from 'recoil'
 import { locationState, mapState, placesState } from '@/atom'
+import { useDispatch } from 'react-redux'
+import { SET_MAP } from '@/redux/slice/mapSlice'
 
 declare global {
   interface Window {
@@ -23,6 +25,7 @@ const setRootHeight = () => {
 }
 
 export function Map({ type }: MapProps) {
+  const dispatch = useDispatch()
   const setMap = useSetRecoilState(mapState)
   const location = useRecoilValue(locationState)
   const setPlaces = useSetRecoilState(placesState)
@@ -50,6 +53,7 @@ export function Map({ type }: MapProps) {
         setPlaces(ps)
       }
       setMap(map)
+      // dispatch(SET_MAP(map))
     })
   }
 

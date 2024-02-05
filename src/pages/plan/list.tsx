@@ -14,56 +14,56 @@ type PlanType = {
 }
 
 export default function PlanListPage() {
-  const router = useRouter()
-  const { data: session } = useSession()
-  const sortingFilter: string[] = ['생성일자', '이름']
+  // const router = useRouter()
+  // const { data: session } = useSession()
+  // const sortingFilter: string[] = ['생성일자', '이름']
 
-  const [isOpen, setIsOpen] = useState<boolean>(false)
-  const [sorting, setSorting] = useState<string>(sortingFilter[0])
-  const [isNull, setIsNull] = useState<boolean>(false)
-  const [plans, setPlans] = useState<PlanType[]>([])
+  // const [isOpen, setIsOpen] = useState<boolean>(false)
+  // const [sorting, setSorting] = useState<string>(sortingFilter[0])
+  // const [isNull, setIsNull] = useState<boolean>(false)
+  // const [plans, setPlans] = useState<PlanType[]>([])
 
-  const getUserId = useCallback(async () => {
-    if (session) {
-      const userEmail = session?.user.email
-      const userRes = await axios(`/api/user?email=${userEmail}`)
-      const userId = userRes.data.result.id
-      getPlans(userId)
-    } else {
-      router.replace('/login')
-    }
-  }, [session, router])
+  // const getUserId = useCallback(async () => {
+  //   if (session) {
+  //     const userEmail = session?.user.email
+  //     const userRes = await axios(`/api/user?email=${userEmail}`)
+  //     const userId = userRes.data.result.id
+  //     getPlans(userId)
+  //   } else {
+  //     router.replace('/login')
+  //   }
+  // }, [session, router])
 
-  async function getPlans(userId) {
-    const res = await axios(`/api/plan?uId=${userId}`)
-    if (res.data) {
-      const plansData = res.data.plans
-      plansData.sort((a, b) => b.createdAt.localeCompare(a.createdAt))
-      setPlans(plansData)
-    } else {
-      setIsNull(true)
-    }
-  }
+  // async function getPlans(userId) {
+  //   const res = await axios(`/api/plan?uId=${userId}`)
+  //   if (res.data) {
+  //     const plansData = res.data.plans
+  //     plansData.sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+  //     setPlans(plansData)
+  //   } else {
+  //     setIsNull(true)
+  //   }
+  // }
 
-  const sortPlans = useCallback(() => {
-    const newPlans = [...plans]
+  // const sortPlans = useCallback(() => {
+  //   const newPlans = [...plans]
 
-    if (sorting === '생성일자') {
-      newPlans.sort((a, b) => b.createdAt.localeCompare(a.createdAt))
-    } else if (sorting === '이름') {
-      newPlans.sort((a, b) => a.title.localeCompare(b.title))
-    }
+  //   if (sorting === '생성일자') {
+  //     newPlans.sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+  //   } else if (sorting === '이름') {
+  //     newPlans.sort((a, b) => a.title.localeCompare(b.title))
+  //   }
 
-    setPlans(newPlans)
-  }, [sorting, plans])
+  //   setPlans(newPlans)
+  // }, [sorting, plans])
 
-  useEffect(() => {
-    getUserId()
-  }, [getUserId])
+  // useEffect(() => {
+  //   getUserId()
+  // }, [getUserId])
 
-  useEffect(() => {
-    sortPlans()
-  }, [sorting, sortPlans])
+  // useEffect(() => {
+  //   sortPlans()
+  // }, [sorting, sortPlans])
 
   return (
     <div className='w-[85%] flex flex-col place-items-center mx-auto'>
@@ -72,7 +72,7 @@ export default function PlanListPage() {
         <div
           className='flex flex-col items-center justify-end gap-1 cursor-pointer'
           onClick={() => {
-            setIsOpen((prev) => !prev)
+            // setIsOpen((prev) => !prev)
           }}
         >
           <div className='relative inline-block text-left'>
@@ -86,7 +86,7 @@ export default function PlanListPage() {
               />
             </button>
 
-            {isOpen && (
+            {/* {isOpen && (
               <div
                 className='absolute right-0 z-10 mt-2 w-40 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'
                 role='menu'
@@ -113,12 +113,12 @@ export default function PlanListPage() {
                   ))}
                 </div>
               </div>
-            )}
+            )} */}
           </div>
         </div>
       </div>
       <div className='w-full place-items-center mx-auto mt-10 grid grid-cols-3 gap-4'>
-        {!isNull &&
+        {/* {!isNull &&
           plans.map((plan) => (
             <div
               key={plan.id}
@@ -141,7 +141,7 @@ export default function PlanListPage() {
               </div>
             </div>
           ))}
-        {isNull && <div>데이터가 없습니다.</div>}
+        {isNull && <div>데이터가 없습니다.</div>} */}
       </div>
     </div>
   )

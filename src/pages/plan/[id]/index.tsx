@@ -1,47 +1,77 @@
 import { mapState } from '@/atom'
 import { Map } from '@/components/Map'
+import { selectMap } from '@/redux/slice/mapSlice'
 import axios from 'axios'
 import Image from 'next/image'
 import router, { useRouter } from 'next/router'
-import { useState } from 'react'
+import { Confirm, Notify } from 'notiflix'
+import { useEffect, useState } from 'react'
 import { useQuery } from 'react-query'
+import { useSelector } from 'react-redux'
 import { useRecoilValue } from 'recoil'
 
 export default function PlanDetailPage() {
   const { id } = useRouter().query
   const map = useRecoilValue(mapState)
+
+  const [data, setData] = useState(null)
   const [isNull, setIsNull] = useState<boolean>(false)
 
-  const { data } = useQuery(
-    `plan-${id}`,
-    async () => {
-      const { data } = await axios(`/api/plan?pId=${id}`)
-      if (data.plans.length > 0) {
-        const markerData = JSON.parse(data?.plans[0].data)
-        setIsNull(false)
-
-        return { plan: data.plans[0], markerData: markerData }
-      } else {
-        setIsNull(true)
-        return null
-      }
-    },
-    {
-      refetchOnWindowFocus: false,
-      enabled: !!id,
-    },
-  )
+  async function getData() {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/plan/${id}`,
+      {
+        method: 'GET',
+        credentials: 'include',
+      },
+    )
+    const data = await response.json()
+    if (data) {
+      console.log(data)
+      const markerData = JSON.parse(data.data)
+      setIsNull(false)
+      setData({ plan: data, markerData })
+    } else {
+      setIsNull(true)
+    }
+  }
 
   if (!isNull && data && map) {
     getMap()
   }
 
-  async function handleRemovePlan() {
-    const confirm = window.confirm('해당 경로를 삭제하시겠습니까?')
-    if (confirm) {
-      const result = await axios.delete(`/api/plan?pId=${id}`)
-      if (result.status === 200) router.replace('/')
-    }
+  function handleRemovePlan() {
+    Confirm.show(
+      '계획 삭제하기',
+      '해당 계획을 삭제하시겠습니까?',
+      '삭제',
+      '취소',
+      async () => {
+        const result = await fetch(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/plan/${id}`,
+          {
+            method: 'DELETE',
+            credentials: 'include',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          },
+        )
+        if (result.status === 200) {
+          Notify.success(`삭제 완료!`, {
+            clickToClose: true,
+          })
+          router.push('/')
+        }
+      },
+      () => {},
+      {
+        titleColor: 'black',
+        okButtonBackground: '#fee2e2',
+        okButtonColor: '#dc2626',
+        borderRadius: '8px',
+      },
+    )
   }
 
   function getMap() {
@@ -88,8 +118,11 @@ export default function PlanDetailPage() {
     })
 
     map.setBounds(bounds)
-    console.log(data.markerData)
   }
+
+  useEffect(() => {
+    getData()
+  }, [id])
 
   return (
     <div className='w-[90%] mx-auto'>
@@ -110,7 +143,7 @@ export default function PlanDetailPage() {
                       width='18'
                       height='18'
                     />
-                    <span>{data.plan?.user.name}</span>
+                    <span>{data.plan?.createdByName}</span>
                   </div>
                   <div className='flex flex-row items-center gap-2'>
                     <Image

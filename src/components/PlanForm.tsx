@@ -9,6 +9,10 @@ import axios from 'axios'
 import { useRouter } from 'next/router'
 import Image from 'next/image'
 import Alert from '@mui/material/Alert'
+import { useRecoilState } from 'recoil'
+import { sessionState } from '@/atom'
+import { useSelector } from 'react-redux'
+import { selectIsLoggedIn, selectMid } from '@/redux/slice/authSlice'
 
 type MarkerData = {}
 
@@ -28,7 +32,7 @@ export default function PlanForm({
   removeMarkers,
 }: PlanFormProps) {
   const router = useRouter()
-  const { data: session } = useSession()
+  const mId = useSelector(selectMid)
   const [isPending, setIsPending] = useState<boolean>(false)
   const [title, setTitle] = useState<string>('')
   const [isError, setIsError] = useState<boolean>(false)
@@ -43,17 +47,38 @@ export default function PlanForm({
       return
     }
 
-    const userId = await getUserId()
+    // const userId = await getUserId()
     const data = makeData()
 
-    const createRes = await axios.post('/api/plan', {
-      title,
-      createdById: userId,
-      data,
-    })
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/plans`,
+      {
+        method: 'POST',
+        body: JSON.stringify({
+          title,
+          createdById: mId,
+          createdAt: new Date(),
+          data,
+        }),
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      },
+    )
 
-    const recordId = createRes.data?.result.id
-    router.replace(`/plan/${recordId}`)
+    const result = await response.json()
+    const planId = result.id
+    router.replace(`/plan/${planId}`)
+
+    // const createRes = await axios.post('/api/plan', {
+    //   title,
+    //   createdById: userId,
+    //   data,
+    // })
+
+    // const recordId = createRes.data?.result.id
+    // router.replace(`/plan/${recordId}`)
   }
 
   function makeData() {
@@ -61,12 +86,12 @@ export default function PlanForm({
     return jsonData
   }
 
-  async function getUserId() {
-    const userEmail = session.user.email
-    const userRes = await axios(`/api/user?email=${userEmail}`)
-    const userId = userRes.data?.result.id
-    return userId
-  }
+  // async function getUserId() {
+  //   const userEmail = session.user.email
+  //   const userRes = await axios(`/api/user?email=${userEmail}`)
+  //   const userId = userRes.data?.result.id
+  //   return userId
+  // }
 
   function handleInputChange(event, id) {
     const { name, value } = event.target
@@ -146,6 +171,8 @@ export default function PlanForm({
     if (markerData.size > 0) setIsPending(true)
     else setIsPending(false)
   }, [markerData.size])
+
+  useEffect(() => {}, [])
 
   return (
     <div>

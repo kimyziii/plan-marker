@@ -1,4 +1,4 @@
-import { LocationType, StoreType } from '@/interface'
+import { LocationType, StoreType, UserType } from '@/interface'
 import { atom } from 'recoil'
 
 const DEFAULT_LAT = 37.497625203
@@ -36,4 +36,9 @@ export const placesState = atom<any>({
 export const searchState = atom<string>({
   key: 'search',
   default: '',
+})
+
+export const sessionState = atom<UserType>({
+  key: 'session',
+  default: null,
 })
