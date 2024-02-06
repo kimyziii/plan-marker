@@ -49,10 +49,7 @@ export default function LoginPage() {
         const user = result.user
 
         const obj = {
-          nickname: user.email,
           email: user.email,
-          uid: user.uid,
-          createdAt: user.metadata.creationTime,
           lastLoginAt: user.metadata.lastSignInTime,
         }
 
