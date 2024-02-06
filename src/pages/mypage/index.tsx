@@ -1,10 +1,12 @@
-import { selectAuth, SET_ACTIVE_USER } from '@/redux/slice/authSlice'
+import { selectAuth, selectMid, SET_ACTIVE_USER } from '@/redux/slice/authSlice'
 import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { GrFormEdit } from 'react-icons/gr'
 import { useRouter } from 'next/navigation'
 import { AiOutlineClose } from 'react-icons/ai'
 import { Confirm, Notify } from 'notiflix'
+import { deleteUser } from 'firebase/auth'
+import { auth as currentUser } from '../../../firebase'
 
 type PlanType = {
   _id: string
@@ -19,6 +21,8 @@ export default function MyPage() {
   const router = useRouter()
   const dispatch = useDispatch()
   const auth = useSelector(selectAuth)
+  const mid = useSelector(selectMid)
+
   const [nickname, setNickname] = useState<string>(null)
   const [editMode, setEditMode] = useState<boolean>(false)
   const [error, setError] = useState<string>(null)
@@ -115,9 +119,76 @@ export default function MyPage() {
     )
   }
 
+  function handleUserDelete() {
+    Confirm.show(
+      '계정 삭제하기',
+      '계정을 삭제하시겠습니까?',
+      '삭제',
+      '취소',
+      () => deleteAuth(),
+      () => {},
+      {
+        titleColor: 'black',
+        okButtonBackground: '#dc2626',
+        okButtonColor: 'white',
+        borderRadius: '8px',
+      },
+    )
+  }
+
+  function deleteAuth() {
+    const curUser = currentUser.currentUser
+
+    deleteUser(curUser)
+      .then(async () => {
+        try {
+          const result = await fetch(
+            `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/${mid}`,
+            {
+              method: 'DELETE',
+              credentials: 'include',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            },
+          )
+          if (result.status === 200) {
+            Notify.success('성공적으로 계정을 삭제했습니다.')
+          }
+        } catch (err) {
+          Notify.failure(err.message)
+        }
+      })
+      .catch((err) => {
+        if (err.code.includes(`recent-login`)) {
+          Confirm.show(
+            '로그인 재요청',
+            `해당 작업에는 재로그인이 필요합니다. <br> 로그인 페이지로 이동하시겠습니까?`,
+            '이동',
+            '취소',
+            () => {
+              router.push('/login')
+            },
+            () => {},
+            {
+              titleColor: 'black',
+              okButtonBackground: '#dc2626',
+              okButtonColor: 'white',
+              borderRadius: '8px',
+              plainText: false,
+            },
+          )
+        }
+      })
+  }
+
   useEffect(() => {
-    getData()
-    setNickname(auth.nickname)
+    if (auth.isLoggedIn) {
+      getData()
+      setNickname(auth.nickname)
+    } else {
+      router.push('/login')
+    }
   }, [auth])
 
   return (
@@ -157,7 +228,10 @@ export default function MyPage() {
             </>
           )}
         </div>
-        <div className='text-sm bg-red-100 px-2 py-1 border border-red-300 rounded-md text-red-600 font-semibold h-[30px]'>
+        <div
+          className='text-sm bg-red-100 px-2 py-1 border border-red-300 rounded-md text-red-600 font-semibold h-[30px] cursor-pointer'
+          onClick={handleUserDelete}
+        >
           탈퇴하기
         </div>
       </div>
