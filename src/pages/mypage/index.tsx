@@ -49,6 +49,12 @@ export default function MyPage() {
     }
   }
 
+  function handleCancel() {
+    setNickname(auth.nickname)
+    setEditMode(false)
+    setError(false)
+  }
+
   useEffect(() => {
     getData()
     setNickname(auth.nickname)
@@ -72,6 +78,12 @@ export default function MyPage() {
                 onClick={handleSave}
               >
                 저장
+              </div>
+              <div
+                className='border border-gray-300 rounded-md px-2 py-1 bg-gray-100 font-semibold text-gray-600 text-xs cursor-pointer'
+                onClick={handleCancel}
+              >
+                취소
               </div>
             </>
           ) : (
