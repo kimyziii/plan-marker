@@ -1,19 +1,18 @@
 import { mapState } from '@/atom'
 import { Map } from '@/components/Map'
-import { selectMid } from '@/redux/slice/authSlice'
-import { selectMap } from '@/redux/slice/mapSlice'
-import axios from 'axios'
+import { selectAuth, selectMid } from '@/redux/slice/authSlice'
 import Image from 'next/image'
-import router, { useRouter } from 'next/router'
+import { useRouter } from 'next/router'
 import { Confirm, Notify } from 'notiflix'
 import { useEffect, useState } from 'react'
-import { useQuery } from 'react-query'
 import { useSelector } from 'react-redux'
 import { useRecoilValue } from 'recoil'
 
 export default function PlanDetailPage() {
-  const { id } = useRouter().query
+  const router = useRouter()
+  const { id } = router.query
   const map = useRecoilValue(mapState)
+  const auth = useSelector(selectAuth)
   const mid = useSelector(selectMid)
 
   const [data, setData] = useState(null)
@@ -125,6 +124,14 @@ export default function PlanDetailPage() {
   useEffect(() => {
     getData()
   }, [id])
+
+  useEffect(() => {
+    if (!auth.isLoggedIn) {
+      router.push('/login')
+    } else {
+      getData()
+    }
+  }, [auth])
 
   return (
     <div className='w-[90%] mx-auto'>
