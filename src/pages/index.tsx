@@ -1,9 +1,7 @@
-import { sessionState } from '@/atom'
 import { selectAuth } from '@/redux/slice/authSlice'
-import axios from 'axios'
-import { useSession } from 'next-auth/react'
 import Image from 'next/image'
-import Router, { useRouter } from 'next/router'
+import { useRouter } from 'next/router'
+import { Confirm, Notify } from 'notiflix'
 import { useCallback, useEffect, useState } from 'react'
 import { AiOutlineClose } from 'react-icons/ai'
 import { useSelector } from 'react-redux'
@@ -26,6 +24,9 @@ export default function Home() {
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/plans`,
       {
         method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
         credentials: 'include',
       },
     )
@@ -58,17 +59,39 @@ export default function Home() {
     setPlans(newPlans)
   }, [sorting])
 
-  async function handleRemovePlan(planId: string) {
-    const confirm = window.confirm('해당 경로를 삭제하시겠습니까?')
-    if (confirm) {
-      // const result = await axios.delete(`/api/plan?pId=${planId}`)
-      // if (result.status === 200) router.reload()
-    }
+  function handleRemovePlan(id: string) {
+    Confirm.show(
+      '계획 삭제하기',
+      '해당 계획을 삭제하시겠습니까?',
+      '삭제',
+      '취소',
+      async () => {
+        const result = await fetch(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/plan/${id}`,
+          {
+            method: 'DELETE',
+            credentials: 'include',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          },
+        )
+        if (result.status === 200) {
+          Notify.success(`삭제 완료!`, {
+            clickToClose: true,
+          })
+          router.push('/')
+        }
+      },
+      () => {},
+      {
+        titleColor: 'black',
+        okButtonBackground: '#dc2626',
+        okButtonColor: 'white',
+        borderRadius: '8px',
+      },
+    )
   }
-
-  // useEffect(() => {
-  //   getUserId()
-  // }, [getUserId])
 
   useEffect(() => {
     sortPlans()

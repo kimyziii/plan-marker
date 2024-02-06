@@ -69,8 +69,8 @@ export default function PlanDetailPage() {
       () => {},
       {
         titleColor: 'black',
-        okButtonBackground: '#fee2e2',
-        okButtonColor: '#dc2626',
+        okButtonBackground: '#dc2626',
+        okButtonColor: 'white',
         borderRadius: '8px',
       },
     )

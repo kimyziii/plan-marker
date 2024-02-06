@@ -53,7 +53,6 @@ export function Map({ type }: MapProps) {
         setPlaces(ps)
       }
       setMap(map)
-      // dispatch(SET_MAP(map))
     })
   }
 

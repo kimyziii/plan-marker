@@ -16,10 +16,6 @@ export default function App({
   pageProps: { session, ...pageProps },
 }: AppProps) {
   return (
-    // <RecoilRoot>
-    //   <QueryClientProvider client={queryClient}>
-    //     <SessionProvider session={session}>
-    // <RecoilRoot>
     <Providers>
       <PersistGate loading={null} persistor={persistor}>
         <RecoilRoot>
@@ -31,10 +27,5 @@ export default function App({
         </RecoilRoot>
       </PersistGate>
     </Providers>
-    // </RecoilRoot>
-    //       <ReactQueryDevtools />
-    //     </SessionProvider>
-    //   </QueryClientProvider>
-    // </RecoilRoot>
   )
 }

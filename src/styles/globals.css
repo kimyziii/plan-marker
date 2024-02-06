@@ -27,7 +27,7 @@
 }
 
 .layout {
-  @apply pt-[50px];
+  @apply pt-[50px] pb-[50px];
 }
 
 .map {

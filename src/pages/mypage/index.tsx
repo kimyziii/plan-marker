@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { GrFormEdit } from 'react-icons/gr'
 import { useRouter } from 'next/navigation'
 import { AiOutlineClose } from 'react-icons/ai'
+import { Confirm, Notify } from 'notiflix'
 
 type PlanType = {
   _id: string
@@ -80,12 +81,38 @@ export default function MyPage() {
     setError(null)
   }
 
-  async function handleRemovePlan(planId: string) {
-    const confirm = window.confirm('해당 경로를 삭제하시겠습니까?')
-    if (confirm) {
-      // const result = await axios.delete(`/api/plan?pId=${planId}`)
-      // if (result.status === 200) router.reload()
-    }
+  function handleRemovePlan(id: string) {
+    Confirm.show(
+      '계획 삭제하기',
+      '해당 계획을 삭제하시겠습니까?',
+      '삭제',
+      '취소',
+      async () => {
+        const result = await fetch(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/plan/${id}`,
+          {
+            method: 'DELETE',
+            credentials: 'include',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          },
+        )
+        if (result.status === 200) {
+          Notify.success(`삭제 완료!`, {
+            clickToClose: true,
+          })
+          router.push('/')
+        }
+      },
+      () => {},
+      {
+        titleColor: 'black',
+        okButtonBackground: '#dc2626',
+        okButtonColor: 'white',
+        borderRadius: '8px',
+      },
+    )
   }
 
   useEffect(() => {
