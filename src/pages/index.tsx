@@ -1,6 +1,6 @@
 import { selectAuth } from '@/redux/slice/authSlice'
 import Image from 'next/image'
-import { useRouter } from 'next/router'
+import { useRouter } from 'next/navigation'
 import { Confirm, Notify } from 'notiflix'
 import { useCallback, useEffect, useState } from 'react'
 import { AiOutlineClose } from 'react-icons/ai'
@@ -80,7 +80,7 @@ export default function Home() {
           Notify.success(`삭제 완료!`, {
             clickToClose: true,
           })
-          router.push('/')
+          router.refresh()
         }
       },
       () => {},

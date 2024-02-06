@@ -102,7 +102,7 @@ export default function MyPage() {
           Notify.success(`삭제 완료!`, {
             clickToClose: true,
           })
-          router.push('/')
+          router.refresh()
         }
       },
       () => {},
