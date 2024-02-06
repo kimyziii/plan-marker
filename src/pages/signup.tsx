@@ -57,6 +57,7 @@ const SignupPage = () => {
         dispatch(
           SET_ACTIVE_USER({
             nickname: result.nickname,
+            email: result.email,
             mid: result._id,
           }),
         )
