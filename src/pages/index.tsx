@@ -23,7 +23,7 @@ export default function Home() {
 
   async function getPlans() {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/plans/${auth.mid}`,
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/plans`,
       {
         method: 'GET',
         credentials: 'include',
@@ -82,9 +82,7 @@ export default function Home() {
   return (
     <div className='w-[85%] flex flex-col place-items-center mx-auto'>
       <div className='w-full mt-10 flex justify-between items-end'>
-        <div className='text-2xl text-gray-600 font-semibold'>
-          나의 여행경로
-        </div>
+        <div className='text-2xl text-gray-600 font-semibold'>탐색하기</div>
         <div
           className='flex flex-col items-center justify-end gap-1 cursor-pointer'
           onClick={() => {
@@ -147,12 +145,14 @@ export default function Home() {
                     {new Date(plan.createdAt).toLocaleString('ko-KR')}
                   </div>
                 </div>
-                <div
-                  className='cursor-pointer'
-                  onClick={() => handleRemovePlan(plan._id)}
-                >
-                  <AiOutlineClose />
-                </div>
+                {auth.mid === plan.createdById && (
+                  <div
+                    className='cursor-pointer'
+                    onClick={() => handleRemovePlan(plan._id)}
+                  >
+                    <AiOutlineClose />
+                  </div>
+                )}
               </div>
               <div
                 className='bg-blue-100 text-center text-sm py-2 text-blue-600 font-semibold cursor-pointer'

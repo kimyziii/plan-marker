@@ -1,5 +1,6 @@
 import { mapState } from '@/atom'
 import { Map } from '@/components/Map'
+import { selectMid } from '@/redux/slice/authSlice'
 import { selectMap } from '@/redux/slice/mapSlice'
 import axios from 'axios'
 import Image from 'next/image'
@@ -13,6 +14,7 @@ import { useRecoilValue } from 'recoil'
 export default function PlanDetailPage() {
   const { id } = useRouter().query
   const map = useRecoilValue(mapState)
+  const mid = useSelector(selectMid)
 
   const [data, setData] = useState(null)
   const [isNull, setIsNull] = useState<boolean>(false)
@@ -160,13 +162,14 @@ export default function PlanDetailPage() {
               </div>
             </div>
             <div className='w-[20%] flex flex-row justify-end gap-2'>
-              {/* <button className='text-sm bg-blue-100 px-2 py-1 border border-blue-300 rounded-md text-blue-600 font-semibold h-[30px]' onClick={() => router.replace(`/plan/edit/${id}`)}>수정</button> */}
-              <button
-                className='text-sm bg-red-100 px-2 py-1 border border-red-300 rounded-md text-red-600 font-semibold h-[30px]'
-                onClick={handleRemovePlan}
-              >
-                삭제
-              </button>
+              {mid === data.plan?.createdById && (
+                <button
+                  className='text-sm bg-red-100 px-2 py-1 border border-red-300 rounded-md text-red-600 font-semibold h-[30px]'
+                  onClick={handleRemovePlan}
+                >
+                  삭제
+                </button>
+              )}
             </div>
           </div>
           <div className='flex gap-4'>

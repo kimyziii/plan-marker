@@ -3,6 +3,16 @@ import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { GrFormEdit } from 'react-icons/gr'
 import { useRouter } from 'next/navigation'
+import { AiOutlineClose } from 'react-icons/ai'
+
+type PlanType = {
+  _id: string
+  title: string
+  data: string
+  createdAt: string
+  updatedAt: string
+  createdById: string
+}
 
 export default function MyPage() {
   const router = useRouter()
@@ -12,14 +22,29 @@ export default function MyPage() {
   const [editMode, setEditMode] = useState<boolean>(false)
   const [error, setError] = useState<string>(null)
 
+  const [isNull, setIsNull] = useState<boolean>(false)
+  const [plans, setPlans] = useState<PlanType[]>([])
+
   async function getData() {
     if (auth) {
-      await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/plans/${auth.mid}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/plans/${auth.mid}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
         },
-      })
+      )
+
+      const data = await response.json()
+
+      if (data.length === 0) {
+        setIsNull(true)
+        return
+      }
+
+      setPlans(data.sort((a, b) => b.createdAt.localeCompare(a.createdAt)))
     }
   }
 
@@ -52,7 +77,15 @@ export default function MyPage() {
   function handleCancel() {
     setNickname(auth.nickname)
     setEditMode(false)
-    setError(false)
+    setError(null)
+  }
+
+  async function handleRemovePlan(planId: string) {
+    const confirm = window.confirm('해당 경로를 삭제하시겠습니까?')
+    if (confirm) {
+      // const result = await axios.delete(`/api/plan?pId=${planId}`)
+      // if (result.status === 200) router.reload()
+    }
   }
 
   useEffect(() => {
@@ -101,7 +134,46 @@ export default function MyPage() {
           탈퇴하기
         </div>
       </div>
-      <span className='text-red-600 text-sm ml-3 mt-1'>{error}</span>
+      <span className='text-red-600 text-sm ml-3 mt-1 mb-2'>{error}</span>
+      <div className='text-sm italic'>{auth.email}</div>
+      <div className='w-full place-items-center mx-auto mt-10 grid grid-cols-3 gap-4'>
+        {!isNull &&
+          plans.map((plan) => (
+            <div
+              key={plan._id}
+              className='w-full border rounded-md flex flex-col'
+            >
+              <div className='px-5 py-4 flex justify-between items-start'>
+                <div>
+                  <div className='text-lg font-semibold'>{plan.title}</div>
+                  <div className='text-gray-500 text-sm'>
+                    {new Date(plan.createdAt).toLocaleString('ko-KR')}
+                  </div>
+                </div>
+                <div
+                  className='cursor-pointer'
+                  onClick={() => handleRemovePlan(plan._id)}
+                >
+                  <AiOutlineClose />
+                </div>
+              </div>
+              <div
+                className='bg-blue-100 text-center text-sm py-2 text-blue-600 font-semibold cursor-pointer'
+                onClick={() => {
+                  router.push(`/plan/${plan._id}`)
+                }}
+                role='presentation'
+              >
+                상세보기
+              </div>
+            </div>
+          ))}
+      </div>
+      {isNull && (
+        <div className='text-base w-full flex justify-center px-8 py-20 border border-gray-200 rounded-md'>
+          데이터가 없습니다.
+        </div>
+      )}
     </div>
   )
 }

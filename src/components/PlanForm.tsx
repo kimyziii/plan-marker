@@ -13,6 +13,7 @@ import { useRecoilState } from 'recoil'
 import { sessionState } from '@/atom'
 import { useSelector } from 'react-redux'
 import { selectIsLoggedIn, selectMid } from '@/redux/slice/authSlice'
+import { Checkbox } from '@mui/material'
 
 type MarkerData = {}
 
@@ -37,6 +38,7 @@ export default function PlanForm({
   const [title, setTitle] = useState<string>('')
   const [isError, setIsError] = useState<boolean>(false)
   const [alert, setAlert] = useState<boolean>(false)
+  const [isPublic, setIsPublic] = useState<boolean>(true)
 
   async function handleSave() {
     // 제목이 입력되지 않은 경우
@@ -47,7 +49,6 @@ export default function PlanForm({
       return
     }
 
-    // const userId = await getUserId()
     const data = makeData()
 
     const response = await fetch(
@@ -56,6 +57,7 @@ export default function PlanForm({
         method: 'POST',
         body: JSON.stringify({
           title,
+          isPublic,
           createdById: mId,
           createdAt: new Date(),
           data,
@@ -70,15 +72,6 @@ export default function PlanForm({
     const result = await response.json()
     const planId = result.id
     router.replace(`/plan/${planId}`)
-
-    // const createRes = await axios.post('/api/plan', {
-    //   title,
-    //   createdById: userId,
-    //   data,
-    // })
-
-    // const recordId = createRes.data?.result.id
-    // router.replace(`/plan/${recordId}`)
   }
 
   function makeData() {
@@ -86,22 +79,15 @@ export default function PlanForm({
     return jsonData
   }
 
-  // async function getUserId() {
-  //   const userEmail = session.user.email
-  //   const userRes = await axios(`/api/user?email=${userEmail}`)
-  //   const userId = userRes.data?.result.id
-  //   return userId
-  // }
-
   function handleInputChange(event, id) {
     const { name, value } = event.target
+    const newData = pendingDatas
 
     if (name === 'title') {
       if (value.length > 0) setIsError(false)
       setTitle(value)
     }
     if (name === 'hour' || name === 'minute' || name === 'memo') {
-      const newData = pendingDatas
       newData.forEach((data) => {
         if (data?.id === id && name === 'hour') {
           data.hour = value
@@ -113,7 +99,11 @@ export default function PlanForm({
       })
     }
 
-    setPendingDatas(pendingDatas)
+    setPendingDatas(newData)
+  }
+
+  function handleCheckboxChange() {
+    setIsPublic((prev) => !prev)
   }
 
   function clearMarkers() {
@@ -312,10 +302,19 @@ export default function PlanForm({
               ))}
             </tbody>
           </table>
-          <div className='flex justify-end'>
+          <div className='flex justify-between items-center mb-10'>
+            <div className='flex items-center'>
+              <Checkbox
+                sx={{ '& .MuiSvgIcon-root': { fontSize: 20 } }}
+                onChange={handleCheckboxChange}
+              />
+              <span className='text-sm'>
+                나만 볼 수 있도록 하려면 체크해 주세요.
+              </span>
+            </div>
             <button
               onClick={handleSave}
-              className='border border-blue-300 rounded-md px-2 py-1 bg-blue-100 font-semibold text-blue-600 text-xs'
+              className='border border-blue-300 rounded-md px-2 py-1 bg-blue-100 font-semibold text-blue-600 text-base h-7 flex items-center'
             >
               저장
             </button>
