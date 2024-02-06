@@ -31,7 +31,7 @@ export default function Navbar() {
   function handleLogout() {
     signOut(auth)
     setIsLoggedIn(false)
-    router.refresh()
+    router.push('/login')
   }
 
   return (
