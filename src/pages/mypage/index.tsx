@@ -237,7 +237,8 @@ export default function MyPage() {
       </div>
       <span className='text-red-600 text-sm ml-3 mt-1 mb-2'>{error}</span>
       <div className='text-sm italic'>{auth.email}</div>
-      <div className='w-full place-items-center mx-auto mt-10 grid grid-cols-3 gap-4'>
+      <h1 className='mt-10 mb-3 text-2xl font-extrabold'>나의 여행경로</h1>
+      <div className='w-full place-items-center mx-auto grid grid-cols-3 gap-4'>
         {!isNull &&
           plans.map((plan) => (
             <div

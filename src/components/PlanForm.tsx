@@ -12,10 +12,10 @@ import Alert from '@mui/material/Alert'
 import { useRecoilState } from 'recoil'
 import { sessionState } from '@/atom'
 import { useSelector } from 'react-redux'
-import { selectIsLoggedIn, selectMid } from '@/redux/slice/authSlice'
+import { selectMid } from '@/redux/slice/authSlice'
 import { Checkbox } from '@mui/material'
-
-type MarkerData = {}
+import { TiArrowSortedUp } from 'react-icons/ti'
+import { TiArrowSortedDown } from 'react-icons/ti'
 
 interface PlanFormProps {
   markerData?: Map<string, any>
@@ -268,23 +268,13 @@ export default function PlanForm({
                         className='border p-1 rounded-md cursor-pointer'
                         onClick={() => handleUp(index)}
                       >
-                        <Image
-                          src='/icons/arrow-up.svg'
-                          width='20'
-                          height='20'
-                          alt='순서 올리기'
-                        />
+                        <TiArrowSortedUp />
                       </div>
                       <div
                         className='border p-1 rounded-md cursor-pointer'
                         onClick={() => handleDown(index)}
                       >
-                        <Image
-                          src='/icons/arrow-down.svg'
-                          width='20'
-                          height='20'
-                          alt='순서 내리기'
-                        />
+                        <TiArrowSortedDown />
                       </div>
                     </div>
                   </td>
