@@ -2,20 +2,17 @@ import {
   REMOVE_ACTIVE_USER,
   selectMid,
   SET_ACTIVE,
-  SET_ACTIVE_USER,
 } from '@/redux/slice/authSlice'
 import { onAuthStateChanged, signOut } from 'firebase/auth'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import { useDispatch } from 'react-redux'
 import { auth } from '../../firebase'
 
 export default function Navbar() {
   const router = useRouter()
   const dispatch = useDispatch()
-
-  const mid = useSelector(selectMid)
 
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false)
 

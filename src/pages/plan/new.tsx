@@ -135,22 +135,30 @@ export default function PlanNewPage() {
   }, [handleBounds, markerData])
 
   return (
-    <div className='flex w-full'>
-      <div className='w-1/3 p-4 rounded-md flex flex-col gap-2'>
-        <div className='mx-2 text-xl text-blue-800 font-semibold'>
-          장소 검색하기
+    <div>
+      <div className='md:flex w-full mobile:hidden'>
+        <div className='w-1/3 p-4 rounded-md flex flex-col gap-2'>
+          <div className='mx-2 text-xl text-blue-800 font-semibold'>
+            장소 검색하기
+          </div>
+          <SearchSide
+            handleSelect={handleSelect}
+            removeMarkers={removeMarkers}
+          />
         </div>
-        <SearchSide handleSelect={handleSelect} removeMarkers={removeMarkers} />
-      </div>
 
-      <div className='w-2/3 mr-4'>
-        <PlanForm
-          markerData={markerData}
-          setMarkerData={setMarkerData}
-          pendingDatas={pendingDatas}
-          setPendingDatas={setPendingDatas}
-          removeMarkers={removeMarkers}
-        />
+        <div className='w-2/3 mr-4'>
+          <PlanForm
+            markerData={markerData}
+            setMarkerData={setMarkerData}
+            pendingDatas={pendingDatas}
+            setPendingDatas={setPendingDatas}
+            removeMarkers={removeMarkers}
+          />
+        </div>
+      </div>
+      <div className='flex justify-center mt-16 md:hidden lg:hidden'>
+        경로 생성은 웹에서 가능합니다.
       </div>
     </div>
   )

@@ -4,13 +4,8 @@ import { IoMdRemoveCircle } from 'react-icons/io'
 import { Dispatch, SetStateAction } from 'react'
 import { useEffect } from 'react'
 import { useState } from 'react'
-import { useSession } from 'next-auth/react'
-import axios from 'axios'
 import { useRouter } from 'next/router'
-import Image from 'next/image'
 import Alert from '@mui/material/Alert'
-import { useRecoilState } from 'recoil'
-import { sessionState } from '@/atom'
 import { useSelector } from 'react-redux'
 import { selectMid } from '@/redux/slice/authSlice'
 import { Checkbox } from '@mui/material'
@@ -295,12 +290,13 @@ export default function PlanForm({
           <div className='flex justify-between items-center mb-10'>
             <div className='flex items-center'>
               <Checkbox
+                id='isPublic'
                 sx={{ '& .MuiSvgIcon-root': { fontSize: 20 } }}
                 onChange={handleCheckboxChange}
               />
-              <span className='text-sm'>
+              <label className='text-sm' htmlFor='isPublic'>
                 나만 볼 수 있도록 하려면 체크해 주세요.
-              </span>
+              </label>
             </div>
             <button
               onClick={handleSave}

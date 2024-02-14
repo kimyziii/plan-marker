@@ -8,20 +8,22 @@ import { FaSearch } from 'react-icons/fa'
 export default function SearchSide({ handleSelect, removeMarkers }) {
   const [searchKeyword, setSearchKeyword] = useState<string>('')
   const [isNull, setIsNull] = useState<boolean>(true)
-  const [resultData, setResultData] = useState<searchResultType[]>([])
+  const [resultData, setResultData] = useState<searchResultType[]>(null)
 
   const places = useRecoilValue(placesState)
 
   function handleSearch() {
     var ps = places
+    if (!searchKeyword) {
+      setResultData(null)
+      setIsNull(true)
+    }
     ps.keywordSearch(searchKeyword, placesSearchCB, { size: 5 })
   }
 
   function placesSearchCB(data: searchResultType[], status: string) {
     if (status === window.kakao.maps.services.Status.OK) {
-      if (data.length === 0) {
-        setIsNull(true)
-      } else {
+      if (data) {
         setResultData(data)
         setIsNull(false)
       }
@@ -32,7 +34,7 @@ export default function SearchSide({ handleSelect, removeMarkers }) {
     <div className='flex flex-col gap-2'>
       <div className='flex justify-between gap-2 w-full h-[35px]'>
         <input
-          className='w-full border px-2 place-items-center rounded-md'
+          className='w-full border px-2 place-items-center rounded-md text-sm'
           type='text'
           placeholder='검색어를 입력해 주세요'
           onChange={(e) => {
@@ -71,14 +73,24 @@ export default function SearchSide({ handleSelect, removeMarkers }) {
                 <div className='w-full flex flex-col text-sm'>
                   {data.road_address_name && (
                     <div className='flex flex-row gap-2'>
-                      <div className='text-gray-500'>도로명주소</div>
-                      <div>{data.road_address_name}</div>
+                      <div className='text-gray-500 lg:block md:hidden'>
+                        도로명주소
+                      </div>
+                      <div className='text-gray-500 lg:hidden md:block w-[18%]'>
+                        도로명
+                      </div>
+                      <div className='md:w-[82%]'>{data.road_address_name}</div>
                     </div>
                   )}
                   {data.address_name && (
                     <div className='flex flex-row gap-2'>
-                      <div className='text-gray-500'>지번주소</div>
-                      <div>{data?.address_name}</div>
+                      <div className='text-gray-500 lg:block md:hidden'>
+                        지번주소
+                      </div>
+                      <div className='text-gray-500 lg:hidden md:block w-[18%]'>
+                        지번
+                      </div>
+                      <div className='md:w-[82%]'>{data?.address_name}</div>
                     </div>
                   )}
                 </div>
@@ -103,6 +115,11 @@ export default function SearchSide({ handleSelect, removeMarkers }) {
               </div>
             </div>
           ))}
+        {!resultData && isNull && (
+          <div className='text-sm text-gray-400 border rounded-md h-[40vh] flex justify-center pt-10'>
+            검색결과가 표시됩니다.
+          </div>
+        )}
       </div>
     </div>
   )

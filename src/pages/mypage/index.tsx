@@ -7,6 +7,7 @@ import { AiOutlineClose } from 'react-icons/ai'
 import { Confirm, Notify } from 'notiflix'
 import { deleteUser } from 'firebase/auth'
 import { auth as currentUser } from '../../../firebase'
+import { formatDate } from '@/utils/dayjs'
 
 type PlanType = {
   _id: string
@@ -192,13 +193,13 @@ export default function MyPage() {
   }, [auth])
 
   return (
-    <div className='w-[60%] flex flex-col justify-center mx-auto mt-12'>
+    <div className='md:w-[80%] lg:w-[60%] flex flex-col justify-center mt-12 mobile:w-[90%] mx-auto'>
       <div className='flex justify-between items-start'>
         <div className='flex items-center gap-2'>
           {editMode ? (
             <>
               <input
-                className='font-semibold text-lg bg-slate-100 rounded-md px-3'
+                className='font-semibold text-lg bg-slate-100 rounded-md px-3 mobile:w-40'
                 value={nickname}
                 onChange={(e) => {
                   setNickname(e.target.value)
@@ -238,7 +239,7 @@ export default function MyPage() {
       <span className='text-red-600 text-sm ml-3 mt-1 mb-2'>{error}</span>
       <div className='text-sm italic'>{auth.email}</div>
       <h1 className='mt-10 mb-3 text-2xl font-extrabold'>나의 여행경로</h1>
-      <div className='w-full place-items-center mx-auto grid grid-cols-3 gap-4'>
+      <div className='w-full place-items-center grid grid-cols-3 gap-4 mobile:grid-cols-1'>
         {!isNull &&
           plans.map((plan) => (
             <div
@@ -249,7 +250,7 @@ export default function MyPage() {
                 <div>
                   <div className='text-lg font-semibold'>{plan.title}</div>
                   <div className='text-gray-500 text-sm'>
-                    {new Date(plan.createdAt).toLocaleString('ko-KR')}
+                    {formatDate(plan.createdAt, 'YYYY. M. D. A h:mm:ss')}
                   </div>
                 </div>
                 <div

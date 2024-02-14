@@ -1,9 +1,4 @@
-import { sessionState } from '@/atom'
-import {
-  selectAuth,
-  selectNickname,
-  SET_ACTIVE_USER,
-} from '@/redux/slice/authSlice'
+import { SET_ACTIVE_USER } from '@/redux/slice/authSlice'
 import {
   GoogleAuthProvider,
   signInWithEmailAndPassword,
@@ -12,15 +7,8 @@ import {
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Notify } from 'notiflix'
-import {
-  ChangeEvent,
-  DOMAttributes,
-  FormEvent,
-  MouseEvent,
-  useState,
-} from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { useSetRecoilState } from 'recoil'
+import { ChangeEvent, FormEvent, MouseEvent, useState } from 'react'
+import { useDispatch } from 'react-redux'
 import { auth } from '../../firebase'
 import { FcGoogle } from 'react-icons/fc'
 
@@ -65,7 +53,6 @@ export default function LoginPage() {
         )
 
         const res = await response.json()
-        console.log(res)
 
         dispatch(
           SET_ACTIVE_USER({
@@ -88,7 +75,7 @@ export default function LoginPage() {
         router.push('/')
       })
       .catch((err) => {
-        console.log(err.message)
+        console.error(err.message)
       })
   }
 
@@ -188,31 +175,6 @@ export default function LoginPage() {
           Google 계정으로 로그인하기
         </div>
       </form>
-      {/* <div className='mx-auto w-full max-w-sm'>
-        <div className='text-blue-800 text-center text-2xl font-bold italic'>
-          Markers
-        </div>
-        <div className='text-center mt-6 text-xl font-bold text-gray-500'>
-          SNS 계정으로 로그인하기
-        </div>
-        <p className='mt-2 text-center text-sm text-gray-500'>
-          계정이 없다면 자동으로 회원가입이 진행됩니다.
-        </p>
-        <div className='mt-10 mx-auto w-full max-w-sm'>
-          <div className='flex flex-col gap-2'>
-            <button
-              type='button'
-              className='text-white flex gap-2 bg-[#4285F4] hover:bg-[#4285F4]/90 font-medium rounded-lg w-full px-5 py-4 text-center items-center justify-center'
-              onClick={() => {
-                signIn('google')
-              }}
-            >
-              <AiOutlineGoogle className='w-6 h-6' />
-              Sign in with Google
-            </button>
-          </div>
-        </div>
-      </div> */}
     </div>
   )
 }
