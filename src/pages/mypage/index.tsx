@@ -239,7 +239,7 @@ export default function MyPage() {
       <span className='text-red-600 text-sm ml-3 mt-1 mb-2'>{error}</span>
       <div className='text-sm italic'>{auth.email}</div>
       <h1 className='mt-10 mb-3 text-2xl font-extrabold'>나의 여행경로</h1>
-      <div className='w-full place-items-center grid grid-cols-3 gap-4 mobile:grid-cols-1'>
+      <div className='w-full place-items-center grid gap-4 mobile:grid-cols-1 md:grid-cols-2 lg:grid-cols-2'>
         {!isNull &&
           plans.map((plan) => (
             <div
