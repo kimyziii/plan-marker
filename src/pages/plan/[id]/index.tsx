@@ -43,6 +43,7 @@ export default function PlanDetailPage() {
   function handleEditPlan() {
     router.push(`/plan/edit/${id}`)
   }
+
   function handleRemovePlan() {
     Confirm.show(
       '계획 삭제하기',
@@ -192,15 +193,18 @@ export default function PlanDetailPage() {
             </div>
           </div>
           <div className='flex gap-4 flex-col md:flex-row lg:flex-row'>
-            <div className='xl:w-2/5 lg:w-2/5 overflow-hidden w-full'>
+            <div className='lg:w-2/5 overflow-hidden w-full'>
               {/* 지도 */}
-              <div className='w-full h-[75vh]' id='map'>
+              <div
+                className='w-full lg:h-[75vh] md:h-[75vh] mobile:h-[50vh]'
+                id='map'
+              >
                 <Map type='full' />
               </div>
             </div>
 
             {/* 장소 정보 */}
-            <div className='xl:w-3/5 lg:w-3/5 w-full'>
+            <div className='lg:w-3/5 w-full'>
               <table className='w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400 mb-3'>
                 <thead className='text-xs text-gray-700 bg-gray-50 dark:bg-gray-700 dark:text-gray-400'>
                   <tr>
@@ -231,7 +235,7 @@ export default function PlanDetailPage() {
                         {index + 1}
                       </th>
                       <td className='w-[10%] whitespace-nowrap text-center px-3 py-3'>
-                        {data.hour}:{data.minute}
+                        {data.hour}:{data.minute ? data.minute : '00'}
                       </td>
                       <td className='w-[30%] px-2 py-2'>{data.place_name}</td>
                       <td className='w-[50%] px-2 py-2 min-h-12'>
