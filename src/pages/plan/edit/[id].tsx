@@ -1,8 +1,11 @@
 import { mapState } from '@/atom'
 import PlanForm from '@/components/PlanForm'
 import SearchSide from '@/components/SearchSide'
+import { selectMid } from '@/redux/slice/authSlice'
+import { Button, useSelect } from '@mui/base'
 import { useRouter } from 'next/router'
 import { useCallback, useEffect, useState } from 'react'
+import { useSelector } from 'react-redux'
 import { useRecoilValue } from 'recoil'
 import { createOverlay } from '../new'
 
@@ -11,9 +14,11 @@ export default function PlanEditPage() {
 
   const { id } = router.query
   const map = useRecoilValue(mapState)
+  const createdById = useSelector(selectMid)
 
   const [data, setData] = useState(null)
   const [isNull, setIsNull] = useState<boolean>(false)
+  const [isMine, setIsMine] = useState<boolean>(true)
 
   const [pendingDatas, setPendingDatas] = useState<any[]>([])
   const [markerData, setMarkerData] = useState(new Map<string, any>(null))
@@ -165,6 +170,12 @@ export default function PlanEditPage() {
       },
     )
     const data = await response.json()
+
+    if (data.createdById !== createdById) {
+      setIsMine(false)
+      return
+    }
+
     if (data._id) {
       setIsNull(false)
       setData({ plan: data, markerData })
@@ -185,6 +196,20 @@ export default function PlanEditPage() {
   useEffect(() => {
     handleBounds()
   }, [handleBounds, markerData])
+
+  if (!isMine) {
+    return (
+      <div className='w-full h-[50vh] flex flex-col justify-center items-center gap-3 text-sm'>
+        <span>수정 권한이 없습니다.</span>
+        <div
+          onClick={() => router.push('/')}
+          className='underline cursor-pointer'
+        >
+          목록으로 돌아가기
+        </div>
+      </div>
+    )
+  }
 
   return (
     <>
