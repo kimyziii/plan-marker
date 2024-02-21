@@ -40,6 +40,9 @@ export default function PlanDetailPage() {
     getMap()
   }
 
+  function handleEditPlan() {
+    router.push(`/plan/edit/${id}`)
+  }
   function handleRemovePlan() {
     Confirm.show(
       '계획 삭제하기',
@@ -169,12 +172,22 @@ export default function PlanDetailPage() {
             </div>
             <div className='w-[20%] flex flex-row justify-end gap-2'>
               {mid === data.plan?.createdById && (
-                <button
-                  className='text-sm bg-red-100 px-2 py-1 border border-red-300 rounded-md text-red-600 font-semibold h-[30px]'
-                  onClick={handleRemovePlan}
-                >
-                  삭제
-                </button>
+                <>
+                  <button
+                    className='text-sm bg-amber-100 px-2 py-1 border
+                    border-amber-300 rounded-md text-amber-600 font-semibold
+                    h-[30px]'
+                    onClick={handleEditPlan}
+                  >
+                    수정
+                  </button>
+                  <button
+                    className='text-sm bg-red-100 px-2 py-1 border border-red-300 rounded-md text-red-600 font-semibold h-[30px]'
+                    onClick={handleRemovePlan}
+                  >
+                    삭제
+                  </button>
+                </>
               )}
             </div>
           </div>

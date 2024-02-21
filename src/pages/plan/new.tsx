@@ -149,6 +149,7 @@ export default function PlanNewPage() {
 
         <div className='w-2/3 mr-4'>
           <PlanForm
+            isEditMode={false}
             markerData={markerData}
             setMarkerData={setMarkerData}
             pendingDatas={pendingDatas}

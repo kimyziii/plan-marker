@@ -13,6 +13,9 @@ import { TiArrowSortedUp } from 'react-icons/ti'
 import { TiArrowSortedDown } from 'react-icons/ti'
 
 interface PlanFormProps {
+  isEditMode: boolean
+  planIsPublic?: boolean
+  planTitle?: string
   markerData?: Map<string, any>
   pendingDatas: any[]
   setMarkerData: Dispatch<SetStateAction<any>>
@@ -21,6 +24,9 @@ interface PlanFormProps {
 }
 
 export default function PlanForm({
+  isEditMode,
+  planIsPublic = true,
+  planTitle,
   markerData,
   setMarkerData,
   pendingDatas,
@@ -28,6 +34,7 @@ export default function PlanForm({
   removeMarkers,
 }: PlanFormProps) {
   const router = useRouter()
+  const { id } = router.query
   const mId = useSelector(selectMid)
   const [isPending, setIsPending] = useState<boolean>(false)
   const [title, setTitle] = useState<string>('')
@@ -35,15 +42,54 @@ export default function PlanForm({
   const [alert, setAlert] = useState<boolean>(false)
   const [isPublic, setIsPublic] = useState<boolean>(true)
 
-  async function handleSave() {
-    // 제목이 입력되지 않은 경우
+  function checkTitle() {
     if (title.trim().length === 0) {
       setIsError(true)
-
       window.scrollTo(0, 0)
+      return false
+    }
+
+    return true
+  }
+
+  async function handleUpdate() {
+    let titleIsChecked = checkTitle()
+    if (!titleIsChecked) {
       return
     }
 
+    setIsError(false)
+    const data = makeData()
+
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/plans/${id}`,
+      {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          title,
+          isPublic,
+          modifiedAt: new Date(),
+          data,
+        }),
+      },
+    )
+
+    if (response.status === 200) {
+      router.replace(`/plan/${id}`)
+    }
+  }
+
+  async function handleSave() {
+    let titleIsChecked = checkTitle()
+    if (!titleIsChecked) {
+      return
+    }
+
+    setIsError(false)
     const data = makeData()
 
     const response = await fetch(
@@ -55,6 +101,7 @@ export default function PlanForm({
           isPublic,
           createdById: mId,
           createdAt: new Date(),
+          modifiedAt: new Date(),
           data,
         }),
         credentials: 'include',
@@ -153,11 +200,12 @@ export default function PlanForm({
   }
 
   useEffect(() => {
-    if (markerData.size > 0) setIsPending(true)
-    else setIsPending(false)
+    if (markerData.size > 0) {
+      setIsPending(true)
+      setTitle(planTitle || '')
+      setIsPublic(planIsPublic)
+    } else setIsPending(false)
   }, [markerData.size])
-
-  useEffect(() => {}, [])
 
   return (
     <div>
@@ -173,6 +221,7 @@ export default function PlanForm({
             onChange={(e) => {
               handleInputChange(e, null)
             }}
+            value={title}
           />
           {isError && (
             <span className='text-red-500 text-xs pt-2 pl-2'>
@@ -195,7 +244,7 @@ export default function PlanForm({
         </div>
       )}
 
-      {isPending && (
+      {pendingDatas.length > 0 && (
         <div className='overflow-x-auto my-3'>
           <table className='w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400 mb-3'>
             <thead className='text-xs text-gray-700 bg-gray-50 dark:bg-gray-700 dark:text-gray-400'>
@@ -241,12 +290,14 @@ export default function PlanForm({
                       onChange={(e) => handleInputChange(e, data?.id)}
                       className='w-[40%] mr-1 text-center bg-blue-100 rounded-md py-[6px]'
                       placeholder='시'
+                      value={data?.hour}
                     ></input>
                     <input
                       name='minute'
                       onChange={(e) => handleInputChange(e, data?.id)}
                       className='w-[40%] text-center bg-blue-100 rounded-md py-[6px]'
                       placeholder='분'
+                      value={data?.minute}
                     ></input>
                   </td>
                   <td className='px-2 py-2 w-[15%]'>{data?.place_name}</td>
@@ -255,6 +306,7 @@ export default function PlanForm({
                       name='memo'
                       onChange={(e) => handleInputChange(e, data?.id)}
                       className='bg-blue-100 rounded-md w-full h-fit px-2 py-2 resize-none'
+                      value={data?.memo}
                     />
                   </td>
                   <td className='px-2 py-2 w-[7%]'>
@@ -293,13 +345,14 @@ export default function PlanForm({
                 id='isPublic'
                 sx={{ '& .MuiSvgIcon-root': { fontSize: 20 } }}
                 onChange={handleCheckboxChange}
+                checked={isPublic ? false : true}
               />
               <label className='text-sm' htmlFor='isPublic'>
                 나만 볼 수 있도록 하려면 체크해 주세요.
               </label>
             </div>
             <button
-              onClick={handleSave}
+              onClick={isEditMode ? handleUpdate : handleSave}
               className='border border-blue-300 rounded-md px-2 py-1 bg-blue-100 font-semibold text-blue-600 text-base h-7 flex items-center'
             >
               저장
