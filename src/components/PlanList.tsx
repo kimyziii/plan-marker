@@ -99,9 +99,8 @@ const PlanList = () => {
   }, [sorting])
 
   useEffect(() => {
-    if (!auth.isLoggedIn) router.push('/login')
-    if (auth.mid) getPlans()
-  }, [auth])
+    getPlans()
+  }, [])
 
   return (
     <div className='w-[85%] flex flex-col place-items-center mx-auto'>

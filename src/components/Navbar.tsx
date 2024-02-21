@@ -1,8 +1,4 @@
-import {
-  REMOVE_ACTIVE_USER,
-  selectMid,
-  SET_ACTIVE,
-} from '@/redux/slice/authSlice'
+import { REMOVE_ACTIVE_USER, SET_ACTIVE } from '@/redux/slice/authSlice'
 import { onAuthStateChanged, signOut } from 'firebase/auth'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'

@@ -129,12 +129,8 @@ export default function PlanDetailPage() {
   }, [id])
 
   useEffect(() => {
-    if (!auth.isLoggedIn) {
-      router.push('/login')
-    } else {
-      getData()
-    }
-  }, [auth])
+    getData()
+  }, [])
 
   return (
     <div className='w-[90%] mx-auto'>

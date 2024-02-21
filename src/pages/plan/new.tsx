@@ -4,6 +4,10 @@ import { mapState } from '@/atom'
 
 import SearchSide from '@/components/SearchSide'
 import PlanForm from '@/components/PlanForm'
+import { useSelector } from 'react-redux'
+import { selectIsLoggedIn } from '@/redux/slice/authSlice'
+import { useRouter } from 'next/router'
+import { Confirm } from 'notiflix'
 
 /**
  * 커스텀오버레이 인스턴스를 생성하여 리턴함
@@ -29,7 +33,9 @@ export function createOverlay(place_name, latlng, map) {
 }
 
 export default function PlanNewPage() {
+  const router = useRouter()
   const map = useRecoilValue(mapState)
+  const isLoggedIn = useSelector(selectIsLoggedIn)
 
   const [pendingDatas, setPendingDatas] = useState<any[]>([])
   const [markerData, setMarkerData] = useState(new Map<string, any>(null))
@@ -131,6 +137,24 @@ export default function PlanNewPage() {
   }
 
   useEffect(() => {
+    if (!isLoggedIn) {
+      Confirm.show(
+        '권한 없음',
+        '새로운 여행 경로를 만들기 위해서는 로그인이 필요합니다.',
+        '확인',
+        '취소',
+        () => {
+          router.push('/login')
+        },
+        () => {
+          router.push('/')
+        },
+      )
+    }
+  }, [])
+
+  useEffect(() => {
+    // if (!auth.isLoggedIn) router.push('/login')
     handleBounds()
   }, [handleBounds, markerData])
 
