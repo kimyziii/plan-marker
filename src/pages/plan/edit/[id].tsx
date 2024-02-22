@@ -4,6 +4,7 @@ import SearchSide from '@/components/SearchSide'
 import { selectMid } from '@/redux/slice/authSlice'
 import {
   ADD_MARKER,
+  CLEAR_MARKERS,
   REMOVE_MARKERS,
   selectPendingDatas,
   SET_EDIT_DATA,
@@ -22,11 +23,12 @@ export default function PlanEditPage() {
   const map = useRecoilValue(mapState)
   const createdById = useSelector(selectMid)
 
-  const [data, setData] = useState(null)
+  const [isPending, setIsPending] = useState<boolean>(true)
   const [isNull, setIsNull] = useState<boolean>(false)
   const [isMine, setIsMine] = useState<boolean>(true)
 
   const pendingDatas = useSelector(selectPendingDatas)
+  const [formInfo, setFormInfo] = useState<any>(null)
   const [markerData, setMarkerData] = useState(new Map<string, any>(null))
 
   const handleBounds = useCallback(() => {
@@ -187,20 +189,27 @@ export default function PlanEditPage() {
 
     if (data._id) {
       setIsNull(false)
-      setData({ plan: data, markerData })
-      dispatch(SET_EDIT_DATA(data))
+      dispatch(SET_EDIT_DATA(JSON.parse(data.data)))
+      setFormInfo({ title: data.title, isPublic: data.isPublic })
+
+      setIsPending(false)
     } else {
       setIsNull(true)
     }
   }
 
   useEffect(() => {
+    dispatch(CLEAR_MARKERS())
     getData()
-  }, [id])
+  }, [dispatch])
 
   useEffect(() => {
-    if (!isNull && data && map) getMap()
-  }, [data, map])
+    if (!isPending) {
+      if (map) {
+        getMap()
+      }
+    }
+  }, [isPending])
 
   useEffect(() => {
     handleBounds()
@@ -238,8 +247,8 @@ export default function PlanEditPage() {
               <div className='w-2/3 mr-4'>
                 <PlanForm
                   isEditMode={true}
-                  planIsPublic={data?.plan?.isPublic}
-                  planTitle={data?.plan?.title}
+                  planIsPublic={formInfo?.isPublic}
+                  planTitle={formInfo?.title}
                   markerData={markerData}
                   setMarkerData={setMarkerData}
                   removeMarkers={removeMarkers}

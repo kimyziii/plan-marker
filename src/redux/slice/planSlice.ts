@@ -1,30 +1,23 @@
 import { dataType, planType } from '@/interface'
 import { createSlice } from '@reduxjs/toolkit'
-import { enableMapSet } from 'immer'
-
-enableMapSet()
 
 interface PlanState {
   // any: 카카오 지도 marker, customOverlay, {위도, 경도}
   pendingDatas: planType[]
-  title: string
 }
 
 const initialState = {
   markerDatas: null,
   pendingDatas: null,
-  title: null,
-  isPublic: true,
 }
 
 const planSlice = createSlice({
   name: 'plan',
   initialState,
   reducers: {
-    SET_EDIT_DATA: (state: PlanState, action: { payload: dataType }) => {
+    SET_EDIT_DATA: (state: PlanState, action: { payload: planType[] }) => {
       const data = action.payload
-      state.title = data.title
-      state.pendingDatas = JSON.parse(data.data)
+      state.pendingDatas = data
     },
 
     ADD_MARKER: (
