@@ -5,7 +5,7 @@ import { useRecoilValue } from 'recoil'
 
 import { FaSearch } from 'react-icons/fa'
 
-export default function SearchSide({ handleSelect, removeMarkers }) {
+  const [noData, setNoData] = useState<boolean>(false)
   const [searchKeyword, setSearchKeyword] = useState<string>('')
   const [isNull, setIsNull] = useState<boolean>(true)
   const [resultData, setResultData] = useState<searchResultType[]>(null)
@@ -26,7 +26,12 @@ export default function SearchSide({ handleSelect, removeMarkers }) {
       if (data) {
         setResultData(data)
         setIsNull(false)
+        setNoData(false)
       }
+    } else {
+      setResultData(null)
+      setIsNull(true)
+      setNoData(true)
     }
   }
 
@@ -40,8 +45,8 @@ export default function SearchSide({ handleSelect, removeMarkers }) {
           onChange={(e) => {
             setSearchKeyword(e.target.value)
           }}
-          onKeyDown={(event: React.KeyboardEvent<HTMLElement>) => {
-            if (event?.key == 'Enter') {
+          onKeyUp={(e) => {
+            if (e?.key == 'Enter') {
               handleSearch()
             }
           }}
@@ -115,9 +120,15 @@ export default function SearchSide({ handleSelect, removeMarkers }) {
               </div>
             </div>
           ))}
-        {!resultData && isNull && (
+        {!resultData && isNull && !noData && (
           <div className='text-sm text-gray-400 border rounded-md h-[40vh] flex justify-center pt-10'>
             검색결과가 표시됩니다.
+          </div>
+        )}
+        {isNull && noData && (
+          <div className='text-sm text-gray-400 border rounded-md h-[40vh] flex justify-center text-center pt-10'>
+            검색 결과가 없습니다. <br />
+            검색어를 확인해 주세요.
           </div>
         )}
       </div>
