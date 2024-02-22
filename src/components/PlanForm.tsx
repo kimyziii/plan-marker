@@ -202,10 +202,17 @@ export default function PlanForm({
   useEffect(() => {
     if (markerData.size > 0) {
       setIsPending(true)
-      setTitle(planTitle || '')
       setIsPublic(planIsPublic)
     } else setIsPending(false)
   }, [markerData.size])
+
+  useEffect(() => {
+    if (isEditMode) {
+      setTitle(planTitle)
+    } else {
+      setTitle('')
+    }
+  }, [])
 
   return (
     <div>
