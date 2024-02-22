@@ -12,7 +12,18 @@
 
 <br/>
 
-# 로그인하기
+# 업데이트
+
+### (2024.02.21) 
+- 이전에 만들었던 경로를 수정할 수 있도록 하였습니다.
+- 공개 설정 된 여행 경로는 로그인 없이 확인할 수 있되, 생성과 수정/삭제는 회원만 가능하도록 변경하였습니다.
+- 임의로 url을 조작하여 접속하는 경우에 대한 처리를 했습니다.
+
+  <br/>
+
+# 기본 기능
+
+## 로그인하기
 
 <img width="700" alt="스크린샷 2024-02-13 오후 2 26 56" src="https://github.com/kimyziii/plan-marker/assets/72454630/b6542ad0-8e73-448d-928e-1c328aab2037">
 
@@ -22,7 +33,7 @@ Firebase의 Authentication을 사용하여 이메일/비밀번호 및 구글 로
 
 <br/>
 
-# 여행경로 리스트
+## 여행경로 리스트
 
 <img width="700" alt="스크린샷 2024-02-13 오후 2 32 45" src="https://github.com/kimyziii/plan-marker/assets/72454630/0fd9acc1-c3be-4a55-9378-e98cde4ae7ff">
 
@@ -37,7 +48,7 @@ Firebase의 Authentication을 사용하여 이메일/비밀번호 및 구글 로
 <br/>
 
 
-# 경로 생성 페이지
+## 경로 생성 페이지
 
 <img width="700" alt="스크린샷 2024-02-13 오후 2 28 50" src="https://github.com/kimyziii/plan-marker/assets/72454630/7ab62940-45c9-4fd7-8e3f-40a3c57190a0">
 
@@ -59,7 +70,7 @@ Firebase의 Authentication을 사용하여 이메일/비밀번호 및 구글 로
 
 <br/>
 
-# 여행경로 상세페이지
+## 여행경로 상세페이지
 
 <img width="700" alt="스크린샷 2024-02-13 오후 2 31 18" src="https://github.com/kimyziii/plan-marker/assets/72454630/a4b49e2b-3b1e-4bf7-9d88-3b653d84bc16">
 
@@ -69,7 +80,7 @@ Firebase의 Authentication을 사용하여 이메일/비밀번호 및 구글 로
 
 <br/>
 
-# 마이페이지
+## 마이페이지
 
 <img width="700" alt="스크린샷 2024-02-13 오후 2 31 26" src="https://github.com/kimyziii/plan-marker/assets/72454630/ec144840-40e9-42bc-af92-6767c3b6f048">
 
@@ -80,3 +91,4 @@ Firebase의 Authentication을 사용하여 이메일/비밀번호 및 구글 로
 탈퇴하기 버튼을 눌러 내 정보를 삭제할 수도 있습니다.
 
 또한, 닉네임을 변경할 수 있고 중복된 닉네임이라면 저장시에 경고 메세지를 확인할 수 있습니다.
+
