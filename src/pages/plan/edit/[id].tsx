@@ -2,15 +2,21 @@ import { mapState } from '@/atom'
 import PlanForm from '@/components/PlanForm'
 import SearchSide from '@/components/SearchSide'
 import { selectMid } from '@/redux/slice/authSlice'
-import { Button, useSelect } from '@mui/base'
+import {
+  ADD_MARKER,
+  REMOVE_MARKERS,
+  selectPendingDatas,
+  SET_EDIT_DATA,
+} from '@/redux/slice/planSlice'
 import { useRouter } from 'next/router'
 import { useCallback, useEffect, useState } from 'react'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { useRecoilValue } from 'recoil'
 import { createOverlay } from '../new'
 
 export default function PlanEditPage() {
   const router = useRouter()
+  const dispatch = useDispatch()
 
   const { id } = router.query
   const map = useRecoilValue(mapState)
@@ -20,7 +26,7 @@ export default function PlanEditPage() {
   const [isNull, setIsNull] = useState<boolean>(false)
   const [isMine, setIsMine] = useState<boolean>(true)
 
-  const [pendingDatas, setPendingDatas] = useState<any[]>([])
+  const pendingDatas = useSelector(selectPendingDatas)
   const [markerData, setMarkerData] = useState(new Map<string, any>(null))
 
   const handleBounds = useCallback(() => {
@@ -101,7 +107,10 @@ export default function PlanEditPage() {
 
   function handleSelect(data) {
     if (markerData.has(data.id)) {
-      data = { ...data, id: `${data.id}${new Date()}` }
+      data = {
+        ...data,
+        id: `${data.id}${new Date()}`,
+      }
     }
 
     var imageSrc = '/icons/default-marker.svg'
@@ -128,6 +137,8 @@ export default function PlanEditPage() {
       customOverlay.setZIndex(1)
     })
 
+    dispatch(ADD_MARKER({ data, marker, customOverlay }))
+
     setMarkerData(
       (prev) =>
         new Map(
@@ -138,7 +149,7 @@ export default function PlanEditPage() {
           }),
         ),
     )
-    setPendingDatas((prevState) => [...prevState, data])
+
     showMarkers(map, marker)
   }
 
@@ -153,8 +164,7 @@ export default function PlanEditPage() {
     newMap.delete(id)
     setMarkerData(newMap)
 
-    const updatedItems = pendingDatas.filter((item) => item.id !== id)
-    setPendingDatas(updatedItems)
+    dispatch(REMOVE_MARKERS(id))
   }
 
   function showMarkers(map, marker) {
@@ -170,7 +180,6 @@ export default function PlanEditPage() {
       },
     )
     const data = await response.json()
-
     if (data.createdById !== createdById) {
       setIsMine(false)
       return
@@ -179,7 +188,7 @@ export default function PlanEditPage() {
     if (data._id) {
       setIsNull(false)
       setData({ plan: data, markerData })
-      setPendingDatas(JSON.parse(data.data))
+      dispatch(SET_EDIT_DATA(data))
     } else {
       setIsNull(true)
     }
@@ -226,7 +235,6 @@ export default function PlanEditPage() {
                   removeMarkers={removeMarkers}
                 />
               </div>
-
               <div className='w-2/3 mr-4'>
                 <PlanForm
                   isEditMode={true}
@@ -234,8 +242,6 @@ export default function PlanEditPage() {
                   planTitle={data?.plan?.title}
                   markerData={markerData}
                   setMarkerData={setMarkerData}
-                  pendingDatas={pendingDatas}
-                  setPendingDatas={setPendingDatas}
                   removeMarkers={removeMarkers}
                 />
               </div>

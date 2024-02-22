@@ -51,3 +51,30 @@ export interface paginationType {
   nextPage: () => {}
   prevPage: () => {}
 }
+
+export interface planType {
+  address_name: string
+  category_group_code: string
+  category_group_name: string
+  category_name: string
+  distance: string
+  id: string
+  phone: string
+  place_name: string
+  place_url: string
+  road_address_name: string
+  x: string
+  y: string
+}
+
+export interface dataType {
+  createdAt: Date
+  createdById: string
+  createdByName: string
+  data: string
+  isPublic: boolean
+  modifiedAt: Date
+  title: string
+  __v: number
+  _id: string
+}

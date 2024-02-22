@@ -4,10 +4,11 @@ import { mapState } from '@/atom'
 
 import SearchSide from '@/components/SearchSide'
 import PlanForm from '@/components/PlanForm'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { selectIsLoggedIn } from '@/redux/slice/authSlice'
 import { useRouter } from 'next/router'
 import { Confirm } from 'notiflix'
+import { ADD_MARKER, REMOVE_MARKERS } from '@/redux/slice/planSlice'
 
 /**
  * 커스텀오버레이 인스턴스를 생성하여 리턴함
@@ -37,12 +38,16 @@ export default function PlanNewPage() {
   const map = useRecoilValue(mapState)
   const isLoggedIn = useSelector(selectIsLoggedIn)
 
-  const [pendingDatas, setPendingDatas] = useState<any[]>([])
+  const dispatch = useDispatch()
+
   const [markerData, setMarkerData] = useState(new Map<string, any>(null))
 
   function handleSelect(data) {
     if (markerData.has(data.id)) {
-      data = { ...data, id: `${data.id}${new Date()}` }
+      data = {
+        ...data,
+        id: `${data.id}${new Date()}`,
+      }
     }
 
     var imageSrc = '/icons/default-marker.svg'
@@ -69,6 +74,8 @@ export default function PlanNewPage() {
       customOverlay.setZIndex(1)
     })
 
+    dispatch(ADD_MARKER({ data, marker, customOverlay }))
+
     setMarkerData(
       (prev) =>
         new Map(
@@ -79,7 +86,7 @@ export default function PlanNewPage() {
           }),
         ),
     )
-    setPendingDatas((prevState) => [...prevState, data])
+
     showMarkers(map, marker)
   }
 
@@ -121,7 +128,7 @@ export default function PlanNewPage() {
    * @param data
    * @returns void
    */
-  function removeMarkers(id) {
+  function removeMarkers(id: string) {
     if (!markerData.has(id)) return
 
     // 마커, 오버레이 삭제하기
@@ -132,8 +139,7 @@ export default function PlanNewPage() {
     newMap.delete(id)
     setMarkerData(newMap)
 
-    const updatedItems = pendingDatas.filter((item) => item.id !== id)
-    setPendingDatas(updatedItems)
+    dispatch(REMOVE_MARKERS(id))
   }
 
   useEffect(() => {
@@ -154,7 +160,6 @@ export default function PlanNewPage() {
   }, [])
 
   useEffect(() => {
-    // if (!auth.isLoggedIn) router.push('/login')
     handleBounds()
   }, [handleBounds, markerData])
 
@@ -176,8 +181,6 @@ export default function PlanNewPage() {
             isEditMode={false}
             markerData={markerData}
             setMarkerData={setMarkerData}
-            pendingDatas={pendingDatas}
-            setPendingDatas={setPendingDatas}
             removeMarkers={removeMarkers}
           />
         </div>

@@ -6,41 +6,46 @@ import { useEffect } from 'react'
 import { useState } from 'react'
 import { useRouter } from 'next/router'
 import Alert from '@mui/material/Alert'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { selectMid } from '@/redux/slice/authSlice'
 import { Checkbox } from '@mui/material'
 import { TiArrowSortedUp } from 'react-icons/ti'
 import { TiArrowSortedDown } from 'react-icons/ti'
+import {
+  CLEAR_MARKERS,
+  REMOVE_MARKERS,
+  selectPendingDatas,
+  SORT_PENDING_DATAS,
+  UPDATE_PENDING_DATAS,
+} from '@/redux/slice/planSlice'
 
 interface PlanFormProps {
   isEditMode: boolean
   planIsPublic?: boolean
   planTitle?: string
   markerData?: Map<string, any>
-  pendingDatas: any[]
   setMarkerData: Dispatch<SetStateAction<any>>
-  setPendingDatas: Dispatch<SetStateAction<any[]>>
   removeMarkers: (id: string) => void
 }
 
 export default function PlanForm({
-  isEditMode,
-  planIsPublic = true,
-  planTitle,
   markerData,
   setMarkerData,
-  pendingDatas,
-  setPendingDatas,
+  isEditMode,
+  planIsPublic,
+  planTitle,
   removeMarkers,
 }: PlanFormProps) {
   const router = useRouter()
   const { id } = router.query
   const mId = useSelector(selectMid)
-  const [isPending, setIsPending] = useState<boolean>(false)
   const [title, setTitle] = useState<string>('')
+  const [isPublic, setIsPublic] = useState<boolean>(true)
   const [isError, setIsError] = useState<boolean>(false)
   const [alert, setAlert] = useState<boolean>(false)
-  const [isPublic, setIsPublic] = useState<boolean>(true)
+
+  const pendingDatas = useSelector(selectPendingDatas)
+  const dispatch = useDispatch()
 
   function checkTitle() {
     if (title.trim().length === 0) {
@@ -123,25 +128,20 @@ export default function PlanForm({
 
   function handleInputChange(event, id) {
     const { name, value } = event.target
-    const newData = pendingDatas
 
     if (name === 'title') {
       if (value.length > 0) setIsError(false)
       setTitle(value)
-    }
-    if (name === 'hour' || name === 'minute' || name === 'memo') {
-      newData.forEach((data) => {
-        if (data?.id === id && name === 'hour') {
-          data.hour = value
-        } else if (data?.id === id && name === 'minute') {
-          data.minute = value
-        } else if (data?.id === id && name === 'memo') {
-          data.memo = value
-        }
-      })
+      return
     }
 
-    setPendingDatas(newData)
+    dispatch(
+      UPDATE_PENDING_DATAS({
+        name,
+        value,
+        id,
+      }),
+    )
   }
 
   function handleCheckboxChange() {
@@ -159,8 +159,6 @@ export default function PlanForm({
     })
 
     setMarkerData(newMap)
-    setIsPending(false)
-    setPendingDatas([])
   }
 
   function handleUp(idx: number) {
@@ -172,13 +170,7 @@ export default function PlanForm({
       return
     }
 
-    let arr = [...pendingDatas]
-
-    let temp = arr[idx]
-    arr[idx] = arr[idx - 1]
-    arr[idx - 1] = temp
-
-    setPendingDatas(arr)
+    dispatch(SORT_PENDING_DATAS({ idx, type: 'up' }))
   }
 
   function handleDown(idx: number) {
@@ -190,29 +182,26 @@ export default function PlanForm({
       return
     }
 
-    let arr = [...pendingDatas]
+    dispatch(SORT_PENDING_DATAS({ idx, type: 'down' }))
+  }
 
-    let temp = arr[idx]
-    arr[idx] = arr[idx + 1]
-    arr[idx + 1] = temp
-
-    setPendingDatas(arr)
+  function handleRemove(id: string) {
+    removeMarkers(id)
+    dispatch(REMOVE_MARKERS(id))
   }
 
   useEffect(() => {
-    if (markerData.size > 0) {
-      setIsPending(true)
-      setIsPublic(planIsPublic)
-    } else setIsPending(false)
-  }, [markerData.size])
+    if (!markerData?.size) {
+      dispatch(CLEAR_MARKERS())
+    }
+  }, [markerData])
 
   useEffect(() => {
     if (isEditMode) {
-      setTitle(planTitle)
-    } else {
-      setTitle('')
+      setTitle((prev) => planTitle)
+      setIsPublic((prev) => planIsPublic)
     }
-  }, [])
+  }, [planTitle, planIsPublic])
 
   return (
     <div>
@@ -228,7 +217,7 @@ export default function PlanForm({
             onChange={(e) => {
               handleInputChange(e, null)
             }}
-            value={title}
+            value={title || undefined}
           />
           {isError && (
             <span className='text-red-500 text-xs pt-2 pl-2'>
@@ -334,9 +323,7 @@ export default function PlanForm({
                   </td>
                   <td
                     className='px-2 py-4 w-[7%]'
-                    onClick={() => {
-                      removeMarkers(data?.id)
-                    }}
+                    onClick={() => handleRemove(data.id)}
                   >
                     <div className='flex justify-center'>
                       <IoMdRemoveCircle color='red' size='20' />
