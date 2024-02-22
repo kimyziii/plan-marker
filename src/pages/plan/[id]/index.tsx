@@ -12,7 +12,6 @@ export default function PlanDetailPage() {
   const router = useRouter()
   const { id } = router.query
   const map = useRecoilValue(mapState)
-  const auth = useSelector(selectAuth)
   const mid = useSelector(selectMid)
 
   const [data, setData] = useState(null)

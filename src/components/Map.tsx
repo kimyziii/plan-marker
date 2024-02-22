@@ -39,16 +39,19 @@ export function Map({ type }: MapProps) {
   function loadKakaoMap() {
     window.kakao.maps.load(() => {
       const container = document.getElementById('map')
-      const options = {
-        center: new window.kakao.maps.LatLng(location?.lat, location?.lng),
-        level: location.zoom,
+
+      if (container) {
+        const options = {
+          center: new window.kakao.maps.LatLng(location?.lat, location?.lng),
+          level: location.zoom,
+        }
+        const map = new window.kakao.maps.Map(container, options)
+        var ps = new window.kakao.maps.services.Places()
+        if (ps) {
+          setPlaces(ps)
+        }
+        setMap(map)
       }
-      const map = new window.kakao.maps.Map(container, options)
-      var ps = new window.kakao.maps.services.Places()
-      if (ps) {
-        setPlaces(ps)
-      }
-      setMap(map)
     })
   }
 
