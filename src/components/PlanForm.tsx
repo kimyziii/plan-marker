@@ -39,6 +39,7 @@ export default function PlanForm({
   const router = useRouter()
   const { id } = router.query
   const mId = useSelector(selectMid)
+
   const [title, setTitle] = useState<string>('')
   const [isPublic, setIsPublic] = useState<boolean>(true)
   const [isError, setIsError] = useState<boolean>(false)
@@ -129,12 +130,6 @@ export default function PlanForm({
   function handleInputChange(event, id) {
     const { name, value } = event.target
 
-    if (name === 'title') {
-      if (value.length > 0) setIsError(false)
-      setTitle(value)
-      return
-    }
-
     dispatch(
       UPDATE_PENDING_DATAS({
         name,
@@ -198,8 +193,8 @@ export default function PlanForm({
 
   useEffect(() => {
     if (isEditMode) {
-      setTitle((prev) => planTitle)
-      setIsPublic((prev) => planIsPublic)
+      setTitle(planTitle)
+      setIsPublic(planIsPublic)
     }
   }, [planTitle, planIsPublic])
 
@@ -215,9 +210,9 @@ export default function PlanForm({
             }`}
             placeholder='여행 경로 이름을 입력해 주세요.'
             onChange={(e) => {
-              handleInputChange(e, null)
+              setTitle(e.target.value)
             }}
-            value={title || undefined}
+            value={title || ''}
           />
           {isError && (
             <span className='text-red-500 text-xs pt-2 pl-2'>
