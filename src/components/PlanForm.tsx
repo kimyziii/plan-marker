@@ -1,7 +1,7 @@
 import { Map as MapComponent } from '@/components/Map'
 
 import Alert from '@mui/material/Alert'
-import { Button, Checkbox } from '@mui/material'
+import { Checkbox } from '@mui/material'
 import { IoMdRemoveCircle } from 'react-icons/io'
 import { TiArrowSortedUp } from 'react-icons/ti'
 import { TiArrowSortedDown } from 'react-icons/ti'
@@ -15,9 +15,6 @@ import {
 } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { selectMid } from '@/redux/slice/authSlice'
-import { Checkbox } from '@mui/material'
-import { TiArrowSortedUp } from 'react-icons/ti'
-import { TiArrowSortedDown } from 'react-icons/ti'
 import {
   CLEAR_MARKERS,
   REMOVE_MARKERS,
