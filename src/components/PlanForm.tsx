@@ -1,5 +1,4 @@
 import { Map as MapComponent } from '@/components/Map'
-import { IoMdRemoveCircle } from 'react-icons/io'
 
 import Alert from '@mui/material/Alert'
 import { Button, Checkbox } from '@mui/material'
