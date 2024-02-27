@@ -235,7 +235,7 @@ export default function PlanForm({
         </div>
       )}
 
-      {pendingDatas.length > 0 && (
+      {pendingDatas?.length > 0 && (
         <div className='overflow-x-auto my-3'>
           <table className='w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400 mb-3'>
             <thead className='text-xs text-gray-700 bg-gray-50 dark:bg-gray-700 dark:text-gray-400'>
