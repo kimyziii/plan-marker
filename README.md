@@ -12,7 +12,15 @@
 
 <br/>
 
-# 업데이트
+# 업데이트 기능
+
+### (2024.02.28)
+- 도시로 경로를 카테고리화 할 수 있도록 변경하였습니다.
+
+
+<img width="700" alt="스크린샷 2024-02-28 오전 4 00 23" src="https://github.com/kimyziii/plan-marker/assets/72454630/75b1a0ca-9147-4b59-9d7f-81bc8ce6b1c5"><br/><br/>
+<img width="700" alt="스크린샷 2024-02-28 오전 4 02 03" src="https://github.com/kimyziii/plan-marker/assets/72454630/67408201-4c1c-481c-9d76-059a77f13cd3">
+
 
 ### (2024.02.21) 
 - 이전에 만들었던 경로를 수정할 수 있도록 하였습니다.
