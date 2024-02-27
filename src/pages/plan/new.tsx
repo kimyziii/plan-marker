@@ -60,6 +60,7 @@ export default function PlanNewPage() {
       position: latlng,
       title: data.place_name,
       image: markerImage,
+      draggable: true,
     })
 
     const customOverlay = createOverlay(data.place_name, latlng, map)

@@ -32,10 +32,12 @@
 
 .map {
   height: var(--window-height);
+  z-index: 0;
 }
 
 .half-map {
   height: calc(var(--window-height) / 2);
+  z-index: 0;
 }
 
 .infoWindow {

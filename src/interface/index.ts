@@ -65,6 +65,9 @@ export interface planType {
   road_address_name: string
   x: string
   y: string
+  hour?: string
+  minute?: string
+  memo?: string
 }
 
 export interface dataType {

@@ -1,6 +1,5 @@
-import { mapState } from '@/atom'
-import PlanForm from '@/components/PlanForm'
-import SearchSide from '@/components/SearchSide'
+import { useCallback, useEffect, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import { selectMid } from '@/redux/slice/authSlice'
 import {
   ADD_MARKER,
@@ -9,33 +8,49 @@ import {
   selectPendingDatas,
   SET_EDIT_DATA,
 } from '@/redux/slice/planSlice'
-import { useRouter } from 'next/router'
-import { useCallback, useEffect, useState } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+
+import { mapState } from '@/atom'
 import { useRecoilValue } from 'recoil'
+
+import PlanForm from '@/components/PlanForm'
+import SearchSide from '@/components/SearchSide'
+
+import { useRouter } from 'next/router'
+
 import { createOverlay } from '../new'
+import { planType } from '@/interface'
+
+type FormInfoType = {
+  title: string
+  isPublic: boolean
+}
 
 export default function PlanEditPage() {
   const router = useRouter()
+  const { id } = router.query
+
   const dispatch = useDispatch()
 
-  const { id } = router.query
   const map = useRecoilValue(mapState)
+
   const createdById = useSelector(selectMid)
+  const pendingDatas = useSelector(selectPendingDatas)
 
   const [isPending, setIsPending] = useState<boolean>(true)
   const [isNull, setIsNull] = useState<boolean>(false)
   const [isMine, setIsMine] = useState<boolean>(true)
 
-  const pendingDatas = useSelector(selectPendingDatas)
-  const [formInfo, setFormInfo] = useState<any>(null)
+  const [formInfo, setFormInfo] = useState<FormInfoType>(null)
   const [markerData, setMarkerData] = useState(new Map<string, any>(null))
 
+  /**
+   * @description 마커를 다 감싸도록 지도 조절
+   */
   const handleBounds = useCallback(() => {
     const points = []
 
     if (markerData?.size > 0) {
-      markerData.forEach((value, key) => {
+      markerData.forEach((value) => {
         const latlng = new window.kakao.maps.LatLng(
           value.data?.y,
           value.data?.x,
@@ -52,16 +67,18 @@ export default function PlanEditPage() {
     }
   }, [map, markerData])
 
+  /**
+   * @description 지도에 마커 및 오버레이 작업
+   */
   function getMap() {
     const newMarkerData = new Map()
 
-    // 마커 작업
     var imageSrc = '/icons/default-marker.svg'
     var imageSize = new window.kakao.maps.Size(30, 35)
     var markerImage = new window.kakao.maps.MarkerImage(imageSrc, imageSize)
 
     var bounds = new window.kakao.maps.LatLngBounds()
-    pendingDatas.forEach((data) => {
+    pendingDatas.forEach((data: planType) => {
       const latlng = new window.kakao.maps.LatLng(data.y, data.x)
 
       var marker = new window.kakao.maps.Marker({
@@ -107,7 +124,11 @@ export default function PlanEditPage() {
     setMarkerData(newMarkerData)
   }
 
-  function handleSelect(data) {
+  /**
+   * @description 검색 결과에서 장소 선택
+   * @param data 추가하고자 하는 장소의 정보
+   */
+  function handleSelect(data: planType) {
     if (markerData.has(data.id)) {
       data = {
         ...data,
@@ -155,7 +176,11 @@ export default function PlanEditPage() {
     showMarkers(map, marker)
   }
 
-  function removeMarkers(id) {
+  /**
+   * @description 계획에서 하나의 장소 삭제
+   * @param id 삭제하고자 하는 장소의 id
+   */
+  function removeMarkers(id: string) {
     if (!markerData.has(id)) return
 
     // 마커, 오버레이 삭제하기
@@ -169,10 +194,18 @@ export default function PlanEditPage() {
     dispatch(REMOVE_MARKERS(id))
   }
 
-  function showMarkers(map, marker) {
+  /**
+   * @description 해당 지도에 해당 마커를 찍음
+   * @param map 지도
+   * @param marker 마커
+   */
+  function showMarkers(map: any, marker: any) {
     marker.setMap(map)
   }
 
+  /**
+   * @description 수정하고자 하는 계획의 데이터 조회
+   */
   async function getData() {
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/plan/${id}`,
@@ -244,7 +277,7 @@ export default function PlanEditPage() {
                   removeMarkers={removeMarkers}
                 />
               </div>
-              <div className='w-2/3 mr-4'>
+              <div className='w-2/3 mr-4 z-10'>
                 <PlanForm
                   isEditMode={true}
                   planIsPublic={formInfo?.isPublic}

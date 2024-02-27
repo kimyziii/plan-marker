@@ -2,8 +2,7 @@ import '/src/styles/globals.css'
 import type { AppProps } from 'next/app'
 import Layout from '../components/Layout'
 import { QueryClient, QueryClientProvider } from 'react-query'
-import { ReactQueryDevtools } from 'react-query/devtools'
-import { SessionProvider } from 'next-auth/react'
+
 import { RecoilRoot } from 'recoil'
 import { persistor } from '@/redux/store'
 

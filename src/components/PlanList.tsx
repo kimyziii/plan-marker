@@ -1,25 +1,32 @@
+import React, { useCallback, useEffect, useState } from 'react'
+import { useSelector } from 'react-redux'
 import { selectAuth } from '@/redux/slice/authSlice'
-import { formatDate } from '@/utils/dayjs'
+
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
+
 import { Confirm, Notify } from 'notiflix'
-import React, { useCallback, useEffect, useState } from 'react'
 import { AiOutlineClose } from 'react-icons/ai'
-import { useSelector } from 'react-redux'
+import { formatDate } from '@/utils/dayjs'
+import { dataType } from '@/interface'
 
-type PlanType = {
-  _id: string
-  title: string
-  data: string
-  createdAt: string
-  updatedAt: string
-  createdById: string
-}
+const sortingFilter: string[] = ['생성일자', '이름']
 
-const PlanList = () => {
+export default function PlanList() {
   const router = useRouter()
   const auth = useSelector(selectAuth)
 
+  // 계획 리스트 상태
+  const [isNull, setIsNull] = useState<boolean>(false)
+  const [plans, setPlans] = useState<dataType[]>([])
+
+  // 정렬 상태
+  const [isOpen, setIsOpen] = useState<boolean>(false)
+  const [sorting, setSorting] = useState<string>(sortingFilter[0])
+
+  /**
+   * @description 공개로 설정 된 모든 여행 계획 리스트를 가져옴
+   */
   async function getPlans() {
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/plans`,
@@ -38,28 +45,36 @@ const PlanList = () => {
       return
     }
 
-    setPlans(data.sort((a, b) => b.createdAt.localeCompare(a.createdAt)))
+    setPlans(
+      data.sort((a: dataType, b: dataType) =>
+        b.createdAt.toString().localeCompare(a.createdAt.toString()),
+      ),
+    )
   }
 
-  const sortingFilter: string[] = ['생성일자', '이름']
-
-  const [isOpen, setIsOpen] = useState<boolean>(false)
-  const [sorting, setSorting] = useState<string>(sortingFilter[0])
-  const [isNull, setIsNull] = useState<boolean>(false)
-  const [plans, setPlans] = useState<PlanType[]>([])
-
+  /**
+   * @description 여행 계획 리스트를 sorting 값에 따라 정렬
+   */
   const sortPlans = useCallback(() => {
     const newPlans = [...plans]
 
     if (sorting === '생성일자') {
-      newPlans.sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+      newPlans.sort((a: dataType, b: dataType) =>
+        b.createdAt.toString().localeCompare(a.createdAt.toString()),
+      )
     } else if (sorting === '이름') {
-      newPlans.sort((a, b) => a.title.localeCompare(b.title))
+      newPlans.sort((a: dataType, b: dataType) =>
+        a.title.localeCompare(b.title),
+      )
     }
 
     setPlans(newPlans)
   }, [sorting])
 
+  /**
+   * @description 특정 여행 계획 한 개 삭제
+   * @param id 삭제하고자 하는 계획의 id값
+   */
   function handleRemovePlan(id: string) {
     Confirm.show(
       '계획 삭제하기',
@@ -197,5 +212,3 @@ const PlanList = () => {
     </div>
   )
 }
-
-export default PlanList

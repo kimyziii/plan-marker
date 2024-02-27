@@ -1,17 +1,29 @@
+import { useState } from 'react'
 import { placesState } from '@/atom'
 import { searchResultType } from '@/interface'
-import { useState } from 'react'
 import { useRecoilValue } from 'recoil'
 
 import { FaSearch } from 'react-icons/fa'
 
+interface SearchSideProps {
+  handleSelect: (data: searchResultType) => void
+  removeMarkers: (id: string) => void
+}
+
+export default function SearchSide({
+  handleSelect,
+  removeMarkers,
+}: SearchSideProps) {
+  const [isNull, setIsNull] = useState<boolean>(true)
   const [noData, setNoData] = useState<boolean>(false)
   const [searchKeyword, setSearchKeyword] = useState<string>('')
-  const [isNull, setIsNull] = useState<boolean>(true)
   const [resultData, setResultData] = useState<searchResultType[]>(null)
 
   const places = useRecoilValue(placesState)
 
+  /**
+   * 입력 받은 키워드로 장소 검색
+   */
   function handleSearch() {
     var ps = places
     if (!searchKeyword) {
@@ -21,6 +33,11 @@ import { FaSearch } from 'react-icons/fa'
     ps.keywordSearch(searchKeyword, placesSearchCB, { size: 5 })
   }
 
+  /**
+   * 검색 상태와 결과를 리턴해주는 callback 함수
+   * @param data 검색 결과를 담은 리스트
+   * @param status 검색 상태
+   */
   function placesSearchCB(data: searchResultType[], status: string) {
     if (status === window.kakao.maps.services.Status.OK) {
       if (data) {

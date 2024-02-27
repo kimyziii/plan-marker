@@ -1,22 +1,35 @@
-import { mapState } from '@/atom'
-import { Map } from '@/components/Map'
-import { selectAuth, selectMid } from '@/redux/slice/authSlice'
-import Image from 'next/image'
-import { useRouter } from 'next/router'
-import { Confirm, Notify } from 'notiflix'
 import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
+import { selectMid } from '@/redux/slice/authSlice'
+
 import { useRecoilValue } from 'recoil'
+import { mapState } from '@/atom'
+
+import { Map } from '@/components/Map'
+
+import Image from 'next/image'
+import { useRouter } from 'next/router'
+
+import { Confirm, Notify } from 'notiflix'
+import { planType } from '@/interface'
 
 export default function PlanDetailPage() {
   const router = useRouter()
   const { id } = router.query
+
   const map = useRecoilValue(mapState)
   const mid = useSelector(selectMid)
 
   const [data, setData] = useState(null)
   const [isNull, setIsNull] = useState<boolean>(false)
 
+  if (!isNull && data && map) {
+    getMap()
+  }
+
+  /**
+   * @description 하나의 여행 계획 데이터 조회
+   */
   async function getData() {
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/plan/${id}`,
@@ -35,14 +48,16 @@ export default function PlanDetailPage() {
     }
   }
 
-  if (!isNull && data && map) {
-    getMap()
-  }
-
+  /**
+   * @description 수정 페이지로 이동
+   */
   function handleEditPlan() {
     router.push(`/plan/edit/${id}`)
   }
 
+  /**
+   * @description 계획 삭제
+   */
   function handleRemovePlan() {
     Confirm.show(
       '계획 삭제하기',
@@ -77,14 +92,16 @@ export default function PlanDetailPage() {
     )
   }
 
+  /**
+   * @description 지도에 마커, 오버레이 표시
+   */
   function getMap() {
-    // 마커 작업
     var imageSrc = '/icons/default-marker.svg'
     var imageSize = new window.kakao.maps.Size(30, 35)
     var markerImage = new window.kakao.maps.MarkerImage(imageSrc, imageSize)
 
     var bounds = new window.kakao.maps.LatLngBounds()
-    data.markerData.forEach((data) => {
+    data.markerData.forEach((data: planType) => {
       const latlng = new window.kakao.maps.LatLng(data.y, data.x)
 
       var marker = new window.kakao.maps.Marker({

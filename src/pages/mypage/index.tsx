@@ -1,26 +1,24 @@
-import { selectAuth, selectMid, SET_ACTIVE_USER } from '@/redux/slice/authSlice'
 import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { GrFormEdit } from 'react-icons/gr'
+import { selectAuth, selectMid, SET_ACTIVE_USER } from '@/redux/slice/authSlice'
+
 import { useRouter } from 'next/navigation'
+
+import { GrFormEdit } from 'react-icons/gr'
 import { AiOutlineClose } from 'react-icons/ai'
+
 import { Confirm, Notify } from 'notiflix'
+
 import { deleteUser } from 'firebase/auth'
 import { auth as currentUser } from '../../../firebase'
-import { formatDate } from '@/utils/dayjs'
 
-type PlanType = {
-  _id: string
-  title: string
-  data: string
-  createdAt: string
-  updatedAt: string
-  createdById: string
-}
+import { formatDate } from '@/utils/dayjs'
+import { dataType } from '@/interface'
 
 export default function MyPage() {
   const router = useRouter()
   const dispatch = useDispatch()
+
   const auth = useSelector(selectAuth)
   const mid = useSelector(selectMid)
 
@@ -29,8 +27,11 @@ export default function MyPage() {
   const [error, setError] = useState<string>(null)
 
   const [isNull, setIsNull] = useState<boolean>(false)
-  const [plans, setPlans] = useState<PlanType[]>([])
+  const [plans, setPlans] = useState<dataType[]>([])
 
+  /**
+   * @description 유저 정보 및 해당 유저의 모든 계획 조회
+   */
   async function getData() {
     if (auth) {
       const response = await fetch(
@@ -50,14 +51,25 @@ export default function MyPage() {
         return
       }
 
-      setPlans(data.sort((a, b) => b.createdAt.localeCompare(a.createdAt)))
+      setPlans(
+        data.sort((a: dataType, b: dataType) =>
+          b.createdAt.toString().localeCompare(a.createdAt.toString()),
+        ),
+      )
     }
   }
 
+  /**
+   * @description 유저 닉네임 보기/수정 상태 변경
+   */
   function handleEdit() {
     setEditMode((prev) => !prev)
   }
 
+  /**
+   * @description 유저 닉네임 변경
+   * 중복되는 닉네임이 있을 경우 에러 메세지 표시
+   */
   async function handleSave() {
     setError(null)
     const response = await fetch(
@@ -80,12 +92,19 @@ export default function MyPage() {
     }
   }
 
+  /**
+   * @description 유저 닉네임 변경 취소
+   */
   function handleCancel() {
     setNickname(auth.nickname)
     setEditMode(false)
     setError(null)
   }
 
+  /**
+   * @description 특정 여행 계획 삭제
+   * @param id 해당 여행 계획의 id값
+   */
   function handleRemovePlan(id: string) {
     Confirm.show(
       '계획 삭제하기',
@@ -120,6 +139,9 @@ export default function MyPage() {
     )
   }
 
+  /**
+   * @description 회원 탈퇴하기 안내창
+   */
   function handleUserDelete() {
     Confirm.show(
       '계정 삭제하기',
@@ -137,6 +159,10 @@ export default function MyPage() {
     )
   }
 
+  /**
+   * @description 회원 정보 삭제
+   * 로그인 한 지 일정 시간이 지난 경우 다시 로그인 후 삭제 과정 필요 (firebase 규칙)
+   */
   function deleteAuth() {
     const curUser = currentUser.currentUser
 

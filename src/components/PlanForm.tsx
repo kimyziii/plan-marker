@@ -1,11 +1,19 @@
 import { Map as MapComponent } from '@/components/Map'
 import { IoMdRemoveCircle } from 'react-icons/io'
 
-import { Dispatch, SetStateAction } from 'react'
-import { useEffect } from 'react'
-import { useState } from 'react'
-import { useRouter } from 'next/router'
 import Alert from '@mui/material/Alert'
+import { Button, Checkbox } from '@mui/material'
+import { IoMdRemoveCircle } from 'react-icons/io'
+import { TiArrowSortedUp } from 'react-icons/ti'
+import { TiArrowSortedDown } from 'react-icons/ti'
+
+import {
+  ChangeEvent,
+  Dispatch,
+  SetStateAction,
+  useEffect,
+  useState,
+} from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { selectMid } from '@/redux/slice/authSlice'
 import { Checkbox } from '@mui/material'
@@ -18,6 +26,10 @@ import {
   SORT_PENDING_DATAS,
   UPDATE_PENDING_DATAS,
 } from '@/redux/slice/planSlice'
+
+import { useRouter } from 'next/router'
+
+import { planType } from '@/interface'
 
 interface PlanFormProps {
   isEditMode: boolean
@@ -38,16 +50,22 @@ export default function PlanForm({
 }: PlanFormProps) {
   const router = useRouter()
   const { id } = router.query
+
   const mId = useSelector(selectMid)
 
   const [title, setTitle] = useState<string>('')
   const [isPublic, setIsPublic] = useState<boolean>(true)
   const [isError, setIsError] = useState<boolean>(false)
   const [alert, setAlert] = useState<boolean>(false)
+  const [selectOpen, setSelectOpen] = useState<boolean>(false)
 
   const pendingDatas = useSelector(selectPendingDatas)
   const dispatch = useDispatch()
 
+  /**
+   * @description 여행 계획의 제목이 비어있는지 체크
+   * @returns boolean
+   */
   function checkTitle() {
     if (title.trim().length === 0) {
       setIsError(true)
@@ -58,6 +76,11 @@ export default function PlanForm({
     return true
   }
 
+  /**
+   * @description 수정 페이지에서 저장 버튼을 눌렀을 때 실행됨
+   * 제목이 있는지 체크 후, 테이블 데이터 string으로 변환하고 API 통해서 기존의 여행 계획 업데이트
+   * 업데이트에 성공하면 해당 여행 계획 상세 페이지로 이동
+   */
   async function handleUpdate() {
     let titleIsChecked = checkTitle()
     if (!titleIsChecked) {
@@ -89,6 +112,11 @@ export default function PlanForm({
     }
   }
 
+  /**
+   * @description 여행 계획 생성 페이지에서 저장 버튼을 눌렀을 때 실행됨
+   * 제목 비었는지 확인 후, 테이블 데이터 string으로 변한하고 API 통해서 여행 계획 생성
+   * 생성에 성공하면 해당 여행 계획 상세 페이지로 이동
+   */
   async function handleSave() {
     let titleIsChecked = checkTitle()
     if (!titleIsChecked) {
@@ -122,12 +150,22 @@ export default function PlanForm({
     router.replace(`/plan/${planId}`)
   }
 
+  /**
+   * @description planType[]을 String으로 변환
+   * @returns string
+   */
   function makeData() {
     const jsonData = JSON.stringify(pendingDatas)
     return jsonData
   }
 
-  function handleInputChange(event, id) {
+  /**
+   * @description 시, 분 및 메모 변경시 데이터 업데이트 함수
+   */
+  function handleInputChange(
+    event: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLTextAreaElement>,
+    id: string,
+  ) {
     const { name, value } = event.target
 
     dispatch(
@@ -139,10 +177,17 @@ export default function PlanForm({
     )
   }
 
+  /**
+   * @description 여행 계획 공개/비공개 변경 함수
+   */
   function handleCheckboxChange() {
     setIsPublic((prev) => !prev)
   }
 
+  /**
+   * @description 전체삭제 버튼 클릭시 실행됨
+   * 지도에 붙어있는 마커와 오버레이도 삭제
+   */
   function clearMarkers() {
     const newMap = new Map(markerData)
 
@@ -156,6 +201,11 @@ export default function PlanForm({
     setMarkerData(newMap)
   }
 
+  /**
+   * @description 여행 계획 순서 변경 (위로)
+   * @param idx 순서 변경하고자 하는 인덱스
+   * @returns 첫번째 요소일 경우 메세지 띄움
+   */
   function handleUp(idx: number) {
     if (idx === 0) {
       setAlert(true)
@@ -168,6 +218,11 @@ export default function PlanForm({
     dispatch(SORT_PENDING_DATAS({ idx, type: 'up' }))
   }
 
+  /**
+   * @description 여행 계획 순서 변경 (아래로)
+   * @param idx 순서 변경하고자 하는 인덱스
+   * @returns 마지막 요소일 경우 메세지 띄움
+   */
   function handleDown(idx: number) {
     if (idx === pendingDatas.length - 1) {
       setAlert(true)
@@ -180,6 +235,10 @@ export default function PlanForm({
     dispatch(SORT_PENDING_DATAS({ idx, type: 'down' }))
   }
 
+  /**
+   * @description 여행 계획 요소 중 하나 삭제
+   * @param id 여행 계획에서 제외하고자 하는 마커의 id값
+   */
   function handleRemove(id: string) {
     removeMarkers(id)
     dispatch(REMOVE_MARKERS(id))
