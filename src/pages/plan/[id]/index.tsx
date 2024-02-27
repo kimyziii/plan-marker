@@ -238,26 +238,34 @@ export default function PlanDetailPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {data.markerData.map((data, index) => (
-                    <tr
-                      key={data.id}
-                      className='bg-white border-b dark:bg-gray-800 dark:border-gray-700'
-                    >
-                      <th
-                        scope='row'
-                        className='w-[10%] px-3 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white text-center'
+                  {data.markerData.map((data, index) => {
+                    const time =
+                      data.hour && data.minute
+                        ? `${data.hour}:${data.minute}`
+                        : data.hour && !data.minute
+                        ? `${data.hour}`
+                        : ''
+                    return (
+                      <tr
+                        key={data.id}
+                        className='bg-white border-b dark:bg-gray-800 dark:border-gray-700'
                       >
-                        {index + 1}
-                      </th>
-                      <td className='w-[10%] whitespace-nowrap text-center px-3 py-3'>
-                        {data.hour}:{data.minute ? data.minute : '00'}
-                      </td>
-                      <td className='w-[30%] px-2 py-2'>{data.place_name}</td>
-                      <td className='w-[50%] px-2 py-2 min-h-12'>
-                        {data.memo}
-                      </td>
-                    </tr>
-                  ))}
+                        <th
+                          scope='row'
+                          className='w-[10%] px-3 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white text-center'
+                        >
+                          {index + 1}
+                        </th>
+                        <td className='w-[10%] whitespace-nowrap text-center px-3 py-3'>
+                          {time}
+                        </td>
+                        <td className='w-[30%] px-2 py-2'>{data.place_name}</td>
+                        <td className='w-[50%] px-2 py-2 min-h-12'>
+                          {data.memo}
+                        </td>
+                      </tr>
+                    )
+                  })}
                 </tbody>
               </table>
             </div>
