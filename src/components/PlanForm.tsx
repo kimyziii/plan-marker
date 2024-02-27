@@ -26,6 +26,7 @@ import {
 import { useRouter } from 'next/router'
 
 import { planType } from '@/interface'
+const numRegex = /^\d+$/
 
 interface PlanFormProps {
   isEditMode: boolean
@@ -163,6 +164,16 @@ export default function PlanForm({
     id: string,
   ) {
     const { name, value } = event.target
+
+    // 시간, 분 입력값 숫자 정규식 확인
+    if (['hour', 'minute'].includes(name) && !numRegex.test(value)) {
+      Notify.info('숫자만 입력해 주세요!', {
+        clickToClose: true,
+      })
+      return
+    }
+
+    if (name === 'title') setIsTitleError(false)
 
     dispatch(
       UPDATE_PENDING_DATAS({
@@ -336,14 +347,14 @@ export default function PlanForm({
                       onChange={(e) => handleInputChange(e, data?.id)}
                       className='w-[40%] mr-1 text-center bg-blue-100 rounded-md py-[6px]'
                       placeholder='시'
-                      value={data?.hour}
+                      value={data?.hour || ''}
                     ></input>
                     <input
                       name='minute'
                       onChange={(e) => handleInputChange(e, data?.id)}
                       className='w-[40%] text-center bg-blue-100 rounded-md py-[6px]'
                       placeholder='분'
-                      value={data?.minute}
+                      value={data?.minute || ''}
                     ></input>
                   </td>
                   <td className='px-2 py-2 w-[15%]'>{data?.place_name}</td>
@@ -352,7 +363,7 @@ export default function PlanForm({
                       name='memo'
                       onChange={(e) => handleInputChange(e, data?.id)}
                       className='bg-blue-100 rounded-md w-full h-fit px-2 py-2 resize-none'
-                      value={data?.memo}
+                      value={data?.memo || ''}
                     />
                   </td>
                   <td className='px-2 py-2 w-[7%]'>
