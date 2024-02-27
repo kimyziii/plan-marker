@@ -1,16 +1,19 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { selectAuth } from '@/redux/slice/authSlice'
 
-import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 
 import { Confirm, Notify } from 'notiflix'
 import { AiOutlineClose } from 'react-icons/ai'
 import { formatDate } from '@/utils/dayjs'
+import { CITY_MAP } from '@/utils/city'
 import { dataType } from '@/interface'
 
-const sortingFilter: string[] = ['생성일자', '이름']
+interface DataTypeGroup {
+  city: string
+  data: dataType[]
+}
 
 export default function PlanList() {
   const router = useRouter()
@@ -18,11 +21,7 @@ export default function PlanList() {
 
   // 계획 리스트 상태
   const [isNull, setIsNull] = useState<boolean>(false)
-  const [plans, setPlans] = useState<dataType[]>([])
-
-  // 정렬 상태
-  const [isOpen, setIsOpen] = useState<boolean>(false)
-  const [sorting, setSorting] = useState<string>(sortingFilter[0])
+  const [plans, setPlans] = useState<DataTypeGroup[]>([])
 
   /**
    * @description 공개로 설정 된 모든 여행 계획 리스트를 가져옴
@@ -40,36 +39,38 @@ export default function PlanList() {
     )
     const data = await response.json()
 
+    const plansObj: { [city: string]: dataType[] } = {}
+    data.forEach((d: dataType) => {
+      const cityName = d.city || '분류없음'
+      if (!plansObj[cityName]) {
+        plansObj[cityName] = []
+      }
+      plansObj[cityName].push(d)
+    })
+    const plans: DataTypeGroup[] = []
+    for (const plan in plansObj) {
+      plans.push({ city: plan, data: plansObj[plan] })
+    }
+
+    // 도시 배열 순서대로 정렬
+    plans.sort((a, b) => {
+      return CITY_MAP.get(a.city) - CITY_MAP.get(b.city)
+    })
+
+    // 도시의 경로들에 대해 생성일자 내림차순으로 정렬
+    plans.forEach((plan) => {
+      plan.data.sort((a, b) => {
+        return b.createdAt.toString().localeCompare(a.createdAt.toString())
+      })
+    })
+
     if (data.length === 0) {
       setIsNull(true)
       return
     }
 
-    setPlans(
-      data.sort((a: dataType, b: dataType) =>
-        b.createdAt.toString().localeCompare(a.createdAt.toString()),
-      ),
-    )
+    setPlans(plans)
   }
-
-  /**
-   * @description 여행 계획 리스트를 sorting 값에 따라 정렬
-   */
-  const sortPlans = useCallback(() => {
-    const newPlans = [...plans]
-
-    if (sorting === '생성일자') {
-      newPlans.sort((a: dataType, b: dataType) =>
-        b.createdAt.toString().localeCompare(a.createdAt.toString()),
-      )
-    } else if (sorting === '이름') {
-      newPlans.sort((a: dataType, b: dataType) =>
-        a.title.localeCompare(b.title),
-      )
-    }
-
-    setPlans(newPlans)
-  }, [sorting])
 
   /**
    * @description 특정 여행 계획 한 개 삭제
@@ -110,98 +111,69 @@ export default function PlanList() {
   }
 
   useEffect(() => {
-    sortPlans()
-  }, [sorting])
-
-  useEffect(() => {
     getPlans()
   }, [])
 
   return (
     <div className='w-[85%] flex flex-col place-items-center mx-auto'>
-      <div className='w-full mt-10 flex justify-between items-end'>
-        <div className='text-2xl text-gray-600 font-semibold'>탐색하기</div>
-        <div
-          className='flex flex-col items-center justify-end gap-1 cursor-pointer'
-          onClick={() => {
-            setIsOpen((prev) => !prev)
-          }}
-        >
-          <div className='relative inline-block text-left'>
-            <button className='inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-base text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50'>
-              정렬
-              <Image
-                src='/icons/bars-arrow-down.svg'
-                width='20'
-                height='20'
-                alt='정렬'
-              />
-            </button>
-
-            {isOpen && (
-              <div
-                className='absolute right-0 z-10 mt-2 w-40 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'
-                role='menu'
-                tabIndex={-1}
-                onMouseLeave={() => setIsOpen(false)}
-              >
-                <div
-                  className='ring-1 ring-black ring-opacity-5 rounded-md overflow-hidden'
-                  role='none'
-                >
-                  {sortingFilter.map((filter) => (
-                    <div
-                      key={filter}
-                      className={`text-gray-700 block px-4 py-2 text-sm ${
-                        sorting === filter ? 'bg-blue-100' : ''
-                      } `}
-                      id='menu-item-0'
-                      onClick={() => {
-                        setSorting(filter)
-                      }}
-                    >
-                      {filter}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
+      <div className='w-full mt-8 flex justify-between items-end'>
+        <div className='text-2xl text-gray-600 font-semibold mb-4'>
+          탐색하기
         </div>
       </div>
-      <div className='w-full place-items-center mx-auto mt-10 grid gap-4 lg:grid-cols-3 md:grid-cols-2 mobile:grid-cols-1'>
+      <div className='w-full flex flex-col gap-3 justify-start items-start mt-4'>
         {!isNull &&
-          plans.map((plan) => (
-            <div
-              key={plan._id}
-              className='w-full border rounded-md flex flex-col'
-            >
-              <div className='px-5 py-4 flex justify-between items-start'>
-                <div>
-                  <div className='text-lg font-semibold'>{plan.title}</div>
-                  <div className='text-gray-500 text-sm'>
-                    {formatDate(plan.createdAt, 'YYYY. M. D. A h:mm:ss')}
-                  </div>
-                </div>
-                {auth.mid === plan.createdById && (
-                  <div
-                    className='cursor-pointer'
-                    onClick={() => handleRemovePlan(plan._id)}
-                  >
-                    <AiOutlineClose />
-                  </div>
-                )}
-              </div>
+          plans.map((p) => (
+            <>
               <div
-                className='bg-blue-100 text-center text-sm py-2 text-blue-600 font-semibold cursor-pointer'
-                onClick={() => {
-                  router.push(`/plan/${plan._id}`)
+                className='text-xl font-bold'
+                style={{
+                  textShadow: 'text-shadow: 0px 0px 6px rgba(255,255,255,0.7)',
                 }}
-                role='presentation'
               >
-                상세보기
+                {p.city}
               </div>
-            </div>
+              <hr className='border-1 border-gray-100 w-full' />
+              <div key={p.city} className='w-full grid grid-cols-3 gap-3 mb-10'>
+                {p?.data.map((plan) => (
+                  <div
+                    key={plan._id}
+                    className='w-full flex flex-col gap-2 min-h-32'
+                  >
+                    <div className='w-full border rounded-md flex flex-col justify-between'>
+                      <div className='px-4 py-3 flex flex-col justify-between items-start gap-1'>
+                        <div className='w-full flex justify-between items-center'>
+                          <div className=' text-lg font-semibold truncate ...'>
+                            {plan.title}
+                          </div>
+
+                          {auth.mid === plan.createdById && (
+                            <div
+                              className='cursor-pointer'
+                              onClick={() => handleRemovePlan(plan._id)}
+                            >
+                              <AiOutlineClose />
+                            </div>
+                          )}
+                        </div>
+                        <div className='text-gray-500 text-sm'>
+                          {formatDate(plan.createdAt, 'YYYY. M. D. A h:mm')}
+                        </div>
+                      </div>
+                      <div
+                        className='bg-blue-100 text-center text-sm py-2 text-blue-600 font-semibold cursor-pointer min-h-9 h-9'
+                        onClick={() => {
+                          router.push(`/plan/${plan._id}`)
+                        }}
+                        role='presentation'
+                      >
+                        상세보기
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
           ))}
       </div>
       {isNull && (

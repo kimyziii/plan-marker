@@ -23,6 +23,7 @@ import { planType } from '@/interface'
 type FormInfoType = {
   title: string
   isPublic: boolean
+  city: string
 }
 
 export default function PlanEditPage() {
@@ -223,7 +224,11 @@ export default function PlanEditPage() {
     if (data._id) {
       setIsNull(false)
       dispatch(SET_EDIT_DATA(JSON.parse(data.data)))
-      setFormInfo({ title: data.title, isPublic: data.isPublic })
+      setFormInfo({
+        title: data.title,
+        isPublic: data.isPublic,
+        city: data.city,
+      })
 
       setIsPending(false)
     } else {
@@ -282,6 +287,7 @@ export default function PlanEditPage() {
                   isEditMode={true}
                   planIsPublic={formInfo?.isPublic}
                   planTitle={formInfo?.title}
+                  planCity={formInfo?.city}
                   markerData={markerData}
                   setMarkerData={setMarkerData}
                   removeMarkers={removeMarkers}

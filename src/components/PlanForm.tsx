@@ -24,14 +24,16 @@ import {
 } from '@/redux/slice/planSlice'
 
 import { useRouter } from 'next/router'
-
 import { planType } from '@/interface'
-const numRegex = /^\d+$/
+import { Notify } from 'notiflix'
+import { CITY_NAME_ARRAY } from '@/utils/city'
 
+const numRegex = /^\d+$/
 interface PlanFormProps {
   isEditMode: boolean
   planIsPublic?: boolean
   planTitle?: string
+  planCity?: string
   markerData?: Map<string, any>
   setMarkerData: Dispatch<SetStateAction<any>>
   removeMarkers: (id: string) => void
@@ -43,6 +45,7 @@ export default function PlanForm({
   isEditMode,
   planIsPublic,
   planTitle,
+  planCity,
   removeMarkers,
 }: PlanFormProps) {
   const router = useRouter()
@@ -50,11 +53,12 @@ export default function PlanForm({
 
   const mId = useSelector(selectMid)
 
+  const [city, setCity] = useState<string>('')
   const [title, setTitle] = useState<string>('')
   const [isPublic, setIsPublic] = useState<boolean>(true)
-  const [isError, setIsError] = useState<boolean>(false)
+  const [isCityError, setIsCityError] = useState<boolean>(false)
+  const [isTitleError, setIsTitleError] = useState<boolean>(false)
   const [alert, setAlert] = useState<boolean>(false)
-  const [selectOpen, setSelectOpen] = useState<boolean>(false)
 
   const pendingDatas = useSelector(selectPendingDatas)
   const dispatch = useDispatch()
@@ -63,28 +67,41 @@ export default function PlanForm({
    * @description 여행 계획의 제목이 비어있는지 체크
    * @returns boolean
    */
-  function checkTitle() {
-    if (title.trim().length === 0) {
-      setIsError(true)
+  function checkRequired() {
+    if (title.trim().length === 0 && city === 'null') {
+      setIsTitleError(true)
+      setIsCityError(true)
+      window.scrollTo(0, 0)
+      return false
+    } else if (title.trim().length === 0) {
+      setIsTitleError(true)
+      window.scrollTo(0, 0)
+      return false
+    } else if (city === 'null') {
+      setIsCityError(true)
       window.scrollTo(0, 0)
       return false
     }
-
     return true
+  }
+
+  function handleSelect(e: ChangeEvent<HTMLSelectElement>) {
+    setIsCityError(false)
+    setCity(e.target.value)
   }
 
   /**
    * @description 수정 페이지에서 저장 버튼을 눌렀을 때 실행됨
-   * 제목이 있는지 체크 후, 테이블 데이터 string으로 변환하고 API 통해서 기존의 여행 계획 업데이트
+   * 제목 및 도시값이 있는지 체크 후, 테이블 데이터 string으로 변환하고 API 통해서 기존의 여행 계획 업데이트
    * 업데이트에 성공하면 해당 여행 계획 상세 페이지로 이동
    */
   async function handleUpdate() {
-    let titleIsChecked = checkTitle()
-    if (!titleIsChecked) {
+    let requiredIsChecked = checkRequired()
+    if (!requiredIsChecked) {
       return
     }
 
-    setIsError(false)
+    setIsTitleError(false)
     const data = makeData()
 
     const response = await fetch(
@@ -100,6 +117,7 @@ export default function PlanForm({
           isPublic,
           modifiedAt: new Date(),
           data,
+          city,
         }),
       },
     )
@@ -115,12 +133,12 @@ export default function PlanForm({
    * 생성에 성공하면 해당 여행 계획 상세 페이지로 이동
    */
   async function handleSave() {
-    let titleIsChecked = checkTitle()
-    if (!titleIsChecked) {
+    let requiredIsChecked = checkRequired()
+    if (!requiredIsChecked) {
       return
     }
 
-    setIsError(false)
+    setIsTitleError(false)
     const data = makeData()
 
     const response = await fetch(
@@ -134,6 +152,7 @@ export default function PlanForm({
           createdAt: new Date(),
           modifiedAt: new Date(),
           data,
+          city,
         }),
         credentials: 'include',
         headers: {
@@ -261,18 +280,41 @@ export default function PlanForm({
     if (isEditMode) {
       setTitle(planTitle)
       setIsPublic(planIsPublic)
+      setCity(planCity)
     }
   }, [planTitle, planIsPublic])
 
   return (
     <div>
-      <div className='flex justify-between my-3 items-center'>
-        <div className='flex flex-col w-[50%] justify-center'>
+      <div className='flex justify-between gap-3 my-3'>
+        <div className='flex flex-col w-[14%] min-w-fit justify-start items-start'>
+          <select
+            id='city'
+            name='city'
+            className={`w-full bg-gray-100 rounded-md px-3 py-1 h-8 ${
+              isCityError ? 'border-2 border-red-600' : ''
+            }`}
+            placeholder='여행 경로 이름을 입력해 주세요.'
+            value={city || ''}
+            onChange={(e) => handleSelect(e)}
+          >
+            <option value='' label='도시 선택' />
+            {CITY_NAME_ARRAY.map((name) => (
+              <option key={name} value={name} label={name}></option>
+            ))}
+          </select>
+          {isCityError && (
+            <span className='text-red-500 text-xs pt-2 pl-2'>
+              도시를 선택해 주세요.
+            </span>
+          )}
+        </div>
+        <div className='flex flex-col w-[78%] justify-start items-start'>
           <input
             id='title'
             name='title'
             className={`w-full bg-gray-100 rounded-md h-8 px-3 py-4 font-normal text-base ${
-              isError ? 'border-2 border-red-600' : ''
+              isTitleError ? 'border-2 border-red-600' : ''
             }`}
             placeholder='여행 경로 이름을 입력해 주세요.'
             onChange={(e) => {
@@ -280,18 +322,20 @@ export default function PlanForm({
             }}
             value={title || ''}
           />
-          {isError && (
+          {isTitleError && (
             <span className='text-red-500 text-xs pt-2 pl-2'>
               여행 경로 이름은 필수값입니다.
             </span>
           )}
         </div>
-        <button
-          onClick={clearMarkers}
-          className='text-sm bg-red-100 px-2 py-1 border border-red-300 rounded-md text-red-600 font-semibold h-[30px]'
-        >
-          전체삭제
-        </button>
+        <div className='flex flex-col w-[8%] min-w-fit justify-start items-start'>
+          <button
+            onClick={clearMarkers}
+            className='text-sm bg-red-100 px-2 py-1 border border-red-300 rounded-md text-red-600 font-semibold h-[30px]'
+          >
+            전체삭제
+          </button>
+        </div>
       </div>
       <MapComponent type='half' />
 
@@ -327,7 +371,7 @@ export default function PlanForm({
               </tr>
             </thead>
             <tbody>
-              {pendingDatas.map((data, index) => (
+              {pendingDatas.map((data: planType, index: number) => (
                 <tr
                   key={data?.id}
                   className='bg-white border-b dark:bg-gray-800 dark:border-gray-700'

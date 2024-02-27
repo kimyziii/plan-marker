@@ -78,6 +78,7 @@ export interface dataType {
   isPublic: boolean
   modifiedAt: Date
   title: string
+  city: string
   __v: number
   _id: string
 }

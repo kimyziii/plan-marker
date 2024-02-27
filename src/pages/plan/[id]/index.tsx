@@ -156,8 +156,11 @@ export default function PlanDetailPage() {
           <div className='w-full flex flex-row items-center justify-between'>
             <div className='w-full mt-4'>
               <div className='flex flex-col gap-2'>
-                <div className='text-2xl font-bold leading-7 text-gray-900'>
+                <div className='flex flex-row gap-3 items-start text-2xl font-bold leading-7 text-gray-900'>
                   {data.plan?.title}
+                  <div className='flex items-center justify-center bg-blue-100 font-semibold text-sm px-2 py-1 rounded-lg'>
+                    {data.plan?.city || '분류없음'}
+                  </div>
                 </div>
                 <div className='flex flex-row mobile:flex-col items-center mobile:items-start text-sm text-gray-500 gap-4 mobile:gap-1'>
                   <div className='flex flex-row items-center gap-2'>
