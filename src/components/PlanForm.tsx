@@ -6,19 +6,12 @@ import { IoMdRemoveCircle } from 'react-icons/io'
 import { TiArrowSortedUp } from 'react-icons/ti'
 import { TiArrowSortedDown } from 'react-icons/ti'
 
-import {
-  ChangeEvent,
-  Dispatch,
-  SetStateAction,
-  useEffect,
-  useState,
-} from 'react'
+import { ChangeEvent, useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { selectMid } from '@/redux/slice/authSlice'
 import {
   CLEAR_MARKERS,
   REMOVE_MARKERS,
-  selectMapDatas,
   selectPendingDatas,
   SORT_PENDING_DATAS,
   UPDATE_PENDING_DATAS,
@@ -31,7 +24,7 @@ import { CITY_NAME_ARRAY } from '@/utils/city'
 import { useRecoilValue } from 'recoil'
 import { mapState } from '@/atom'
 
-const numRegex = /^\d+$/
+const strRegex = /^.+$/
 interface PlanFormProps {
   isEditMode: boolean
   planIsPublic?: boolean
@@ -181,9 +174,8 @@ export default function PlanForm({
     id: string,
   ) {
     const { name, value } = event.target
-
-    // 시간, 분 입력값 숫자 정규식 확인
-    if (['hour', 'minute'].includes(name) && !numRegex.test(value)) {
+    const notANumber = isNaN(Number(value))
+    if (['hour', 'minute'].includes(name) && notANumber) {
       Notify.info('숫자만 입력해 주세요!', {
         clickToClose: true,
       })
