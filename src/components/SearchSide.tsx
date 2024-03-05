@@ -1,19 +1,23 @@
-import { useState } from 'react'
-import { placesState } from '@/atom'
+import { MouseEvent, useState } from 'react'
+import { mapState, placesState } from '@/atom'
 import { searchResultType } from '@/interface'
 import { useRecoilValue } from 'recoil'
 
 import { FaSearch } from 'react-icons/fa'
+import { useDispatch } from 'react-redux'
+import { REMOVE_MARKERS } from '@/redux/slice/planSlice'
 
 interface SearchSideProps {
   handleSelect: (data: searchResultType) => void
-  removeMarkers: (id: string) => void
+  handleDetailOpen?: (data: searchResultType) => void
 }
 
 export default function SearchSide({
   handleSelect,
-  removeMarkers,
+  handleDetailOpen,
 }: SearchSideProps) {
+  const dispatch = useDispatch()
+  const map = useRecoilValue(mapState)
   const [isNull, setIsNull] = useState<boolean>(true)
   const [noData, setNoData] = useState<boolean>(false)
   const [searchKeyword, setSearchKeyword] = useState<string>('')
@@ -52,6 +56,13 @@ export default function SearchSide({
     }
   }
 
+  function removeMarkers(
+    e: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>,
+    id: string,
+  ) {
+    e.stopPropagation()
+    dispatch(REMOVE_MARKERS({ id, map }))
+  }
   return (
     <div className='flex flex-col gap-2'>
       <div className='flex justify-between gap-2 w-full h-[35px]'>
@@ -118,17 +129,18 @@ export default function SearchSide({
                 </div>
                 <div className='flex gap-2 justify-end text-sm mt-1'>
                   <button
-                    className='border border-blue-300 rounded-md px-2 py-1 bg-blue-100 font-semibold text-blue-600 text-xs'
-                    onClick={() => {
+                    className='border border-blue-300 rounded-md px-2 py-1 bg-blue-100 font-semibold text-blue-600 text-xs z-10'
+                    onClick={(event) => {
+                      event.stopPropagation()
                       handleSelect(data)
                     }}
                   >
                     추가
                   </button>
                   <button
-                    className='border rounded-md px-2 py-1 bg-red-100 border-red-300  text-red-600 font-semibold text-xs'
-                    onClick={() => {
-                      removeMarkers(data.id)
+                    className='border rounded-md px-2 py-1 bg-red-100 border-red-300  text-red-600 font-semibold text-xs z-10'
+                    onClick={(event) => {
+                      removeMarkers(event, data.id)
                     }}
                   >
                     삭제
@@ -144,7 +156,8 @@ export default function SearchSide({
         )}
         {isNull && noData && (
           <div className='text-sm text-gray-400 border rounded-md h-[40vh] flex justify-center text-center pt-10'>
-            검색 결과가 없습니다. <br />
+            &apos;{searchKeyword}&apos; 검색 결과가 없습니다.
+            <br />
             검색어를 확인해 주세요.
           </div>
         )}

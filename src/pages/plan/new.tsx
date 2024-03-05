@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useRecoilValue } from 'recoil'
 import { mapState } from '@/atom'
 
@@ -8,30 +8,17 @@ import { useDispatch, useSelector } from 'react-redux'
 import { selectIsLoggedIn } from '@/redux/slice/authSlice'
 import { useRouter } from 'next/router'
 import { Confirm } from 'notiflix'
-import { ADD_MARKER, REMOVE_MARKERS } from '@/redux/slice/planSlice'
+import {
+  ADD_MARKER,
+  CLEAR_MARKERS,
+  selectMapDatas,
+} from '@/redux/slice/planSlice'
 
-/**
- * 커스텀오버레이 인스턴스를 생성하여 리턴함
- * @param place_name
- * @param latlng
- * @returns customOverlay
- */
-export function createOverlay(place_name, latlng, map) {
-  var content =
-    '<div className="customoverlay" style="padding: 3px 8px; background-color: #EEF6FF; border-radius: 14px; border: 1px solid #EDF2FD; color: #2E5BDC; font-size: small;">' +
-    `    <span className="title">${place_name}</span>` +
-    '</div>'
+import { IoCloseOutline } from 'react-icons/io5'
+import { FaMapMarkerAlt, FaPhoneAlt } from 'react-icons/fa'
 
-  var customOverlay = new window.kakao.maps.CustomOverlay({
-    map: map,
-    position: latlng,
-    content: content,
-    xAnchor: 0.5,
-    yAnchor: 0,
-  })
-
-  return customOverlay
-}
+import { searchResultType } from '@/interface'
+import Image from 'next/image'
 
 export default function PlanNewPage() {
   const router = useRouter()
@@ -40,7 +27,28 @@ export default function PlanNewPage() {
 
   const dispatch = useDispatch()
 
+  const [selected, setSelected] = useState<searchResultType>(null)
+  const [openModal, setOpenModal] = useState<boolean>(false)
   const [markerData, setMarkerData] = useState(new Map<string, any>(null))
+
+  async function handleOpenDetail(data) {
+    setOpenModal(true)
+    setSelected(data)
+
+    const response = await fetch(
+      `https://maps.googleapis.com/maps/api/geocode/json?address=${data.address_name}&language=ko&key=${process.env.NEXT_PUBLIC_GOOGLE_MAP_API_KEY}`,
+    )
+    const result = await response.json()
+    console.log(result)
+  }
+
+  async function getPhotos(placeId: string) {
+    const placesResponse = await fetch(
+      `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&key=${process.env.NEXT_PUBLIC_GOOGLE_MAP_API_KEY}`,
+    )
+    const placeResult = await placesResponse.json()
+    console.log(placeResult)
+  }
 
   function handleSelect(data) {
     if (markerData.has(data.id)) {
@@ -50,97 +58,7 @@ export default function PlanNewPage() {
       }
     }
 
-    var imageSrc = '/icons/default-marker.svg'
-    var imageSize = new window.kakao.maps.Size(30, 35)
-    var markerImage = new window.kakao.maps.MarkerImage(imageSrc, imageSize)
-
-    const latlng = new window.kakao.maps.LatLng(data.y, data.x)
-
-    var marker = new window.kakao.maps.Marker({
-      position: latlng,
-      title: data.place_name,
-      image: markerImage,
-      draggable: true,
-    })
-
-    const customOverlay = createOverlay(data.place_name, latlng, map)
-
-    window.kakao.maps.event.addListener(marker, 'mouseover', function () {
-      marker.setZIndex(100)
-      customOverlay.setZIndex(100)
-    })
-
-    window.kakao.maps.event.addListener(marker, 'mouseout', function () {
-      marker.setZIndex(1)
-      customOverlay.setZIndex(1)
-    })
-
-    dispatch(ADD_MARKER({ data, marker, customOverlay }))
-
-    setMarkerData(
-      (prev) =>
-        new Map(
-          prev.set(data.id, {
-            marker,
-            data: { x: data.x, y: data.y },
-            customOverlay,
-          }),
-        ),
-    )
-
-    showMarkers(map, marker)
-  }
-
-  /**
-   * 해당 지도에 해당 마커를 표시함
-   * @param map
-   * @param marker
-   */
-  function showMarkers(map, marker) {
-    marker.setMap(map)
-  }
-
-  /**
-   * 마커가 추가 혹은 삭제 될 때, 지도의 범위를 재설정함
-   */
-  const handleBounds = useCallback(() => {
-    const points = []
-
-    if (markerData?.size > 0) {
-      markerData.forEach((value, key) => {
-        const latlng = new window.kakao.maps.LatLng(
-          value.data?.y,
-          value.data?.x,
-        )
-        points.push(latlng)
-      })
-      var bounds = new window.kakao.maps.LatLngBounds()
-
-      for (let i = 0; i < points.length; i++) {
-        bounds.extend(points[i])
-      }
-
-      map.setBounds(bounds)
-    }
-  }, [map, markerData])
-
-  /**
-   * 삭제 버튼을 통해 경로에서 해당 장소를 삭제함
-   * @param data
-   * @returns void
-   */
-  function removeMarkers(id: string) {
-    if (!markerData.has(id)) return
-
-    // 마커, 오버레이 삭제하기
-    markerData.get(id)?.marker.setMap(null)
-    markerData.get(id)?.customOverlay.setMap(null)
-
-    const newMap = new Map(markerData)
-    newMap.delete(id)
-    setMarkerData(newMap)
-
-    dispatch(REMOVE_MARKERS(id))
+    dispatch(ADD_MARKER({ data, map }))
   }
 
   useEffect(() => {
@@ -157,33 +75,56 @@ export default function PlanNewPage() {
           router.push('/')
         },
       )
+    } else {
+      dispatch(CLEAR_MARKERS({ map }))
     }
   }, [])
 
-  useEffect(() => {
-    handleBounds()
-  }, [handleBounds, markerData])
-
   return (
     <div>
+      {openModal && (
+        <div className='absolute w-full flex justify-center'>
+          <div
+            onClick={() => setOpenModal(false)}
+            className='absolute top-0 left-0 w-full h-[100vh] bg-black opacity-30 z-20'
+          />
+          <div className='absolute w-[500px] h-[55vh] mt-20 transform bg-white z-30 rounded-lg'>
+            <div
+              onClick={() => setOpenModal(false)}
+              className='absolute right-0 px-4 py-4'
+            >
+              <IoCloseOutline size='20' />
+            </div>
+            <div className='px-5 py-5'>
+              <div>{selected.place_name}</div>
+              <div className='w-full min-h-[250px]'>
+                <Image src='/' width={100} height={250} alt='' />
+              </div>
+              <div className='flex flex-row gap-2 justify-start items-center'>
+                <FaMapMarkerAlt />
+                {selected.road_address_name}
+              </div>
+              <div className='flex flex-row gap-2 justify-start items-center'>
+                <FaPhoneAlt />
+                {selected.phone}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       <div className='md:flex w-full mobile:hidden'>
-        <div className='w-1/3 p-4 rounded-md flex flex-col gap-2'>
+        <div className='w-1/3 p-4 rounded-md flex flex-col gap-2 z-10'>
           <div className='mx-2 text-xl text-blue-800 font-semibold'>
             장소 검색하기
           </div>
           <SearchSide
+            handleDetailOpen={handleOpenDetail}
             handleSelect={handleSelect}
-            removeMarkers={removeMarkers}
           />
         </div>
 
         <div className='w-2/3 mr-4'>
-          <PlanForm
-            isEditMode={false}
-            markerData={markerData}
-            setMarkerData={setMarkerData}
-            removeMarkers={removeMarkers}
-          />
+          <PlanForm isEditMode={false} />
         </div>
       </div>
       <div className='flex justify-center mt-16 md:hidden lg:hidden'>

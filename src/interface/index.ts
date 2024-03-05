@@ -82,3 +82,20 @@ export interface dataType {
   __v: number
   _id: string
 }
+
+export interface DataTypeGroup {
+  city: string
+  data: dataType[]
+}
+
+export interface prevMapDataType {
+  id: string
+  x: string
+  y: string
+  place_name?: string
+}
+
+export interface mapDataType extends prevMapDataType {
+  marker: any
+  customOverlay: any
+}

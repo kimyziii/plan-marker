@@ -18,6 +18,7 @@ import { selectMid } from '@/redux/slice/authSlice'
 import {
   CLEAR_MARKERS,
   REMOVE_MARKERS,
+  selectMapDatas,
   selectPendingDatas,
   SORT_PENDING_DATAS,
   UPDATE_PENDING_DATAS,
@@ -27,6 +28,8 @@ import { useRouter } from 'next/router'
 import { planType } from '@/interface'
 import { Notify } from 'notiflix'
 import { CITY_NAME_ARRAY } from '@/utils/city'
+import { useRecoilValue } from 'recoil'
+import { mapState } from '@/atom'
 
 const numRegex = /^\d+$/
 interface PlanFormProps {
@@ -34,24 +37,20 @@ interface PlanFormProps {
   planIsPublic?: boolean
   planTitle?: string
   planCity?: string
-  markerData?: Map<string, any>
-  setMarkerData: Dispatch<SetStateAction<any>>
-  removeMarkers: (id: string) => void
 }
 
 export default function PlanForm({
-  markerData,
-  setMarkerData,
   isEditMode,
   planIsPublic,
   planTitle,
   planCity,
-  removeMarkers,
 }: PlanFormProps) {
   const router = useRouter()
+  const dispatch = useDispatch()
   const { id } = router.query
 
   const mId = useSelector(selectMid)
+  const map = useRecoilValue(mapState)
 
   const [city, setCity] = useState<string>('')
   const [title, setTitle] = useState<string>('')
@@ -61,7 +60,6 @@ export default function PlanForm({
   const [alert, setAlert] = useState<boolean>(false)
 
   const pendingDatas = useSelector(selectPendingDatas)
-  const dispatch = useDispatch()
 
   /**
    * @description 여행 계획의 제목이 비어있는지 체크
@@ -215,16 +213,7 @@ export default function PlanForm({
    * 지도에 붙어있는 마커와 오버레이도 삭제
    */
   function clearMarkers() {
-    const newMap = new Map(markerData)
-
-    newMap.forEach((value, key) => {
-      value.marker.setMap(null)
-      value.customOverlay.setMap(null)
-
-      newMap.delete(key)
-    })
-
-    setMarkerData(newMap)
+    dispatch(CLEAR_MARKERS({ map: map }))
   }
 
   /**
@@ -241,7 +230,7 @@ export default function PlanForm({
       return
     }
 
-    dispatch(SORT_PENDING_DATAS({ idx, type: 'up' }))
+    dispatch(SORT_PENDING_DATAS({ idx, type: 'up', map }))
   }
 
   /**
@@ -258,7 +247,7 @@ export default function PlanForm({
       return
     }
 
-    dispatch(SORT_PENDING_DATAS({ idx, type: 'down' }))
+    dispatch(SORT_PENDING_DATAS({ idx, type: 'down', map }))
   }
 
   /**
@@ -266,15 +255,8 @@ export default function PlanForm({
    * @param id 여행 계획에서 제외하고자 하는 마커의 id값
    */
   function handleRemove(id: string) {
-    removeMarkers(id)
-    dispatch(REMOVE_MARKERS(id))
+    dispatch(REMOVE_MARKERS({ id, map }))
   }
-
-  useEffect(() => {
-    if (!markerData?.size) {
-      dispatch(CLEAR_MARKERS())
-    }
-  }, [markerData])
 
   useEffect(() => {
     if (isEditMode) {

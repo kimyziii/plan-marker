@@ -1,10 +1,9 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { selectMid } from '@/redux/slice/authSlice'
 import {
   ADD_MARKER,
   CLEAR_MARKERS,
-  REMOVE_MARKERS,
   selectPendingDatas,
   SET_EDIT_DATA,
 } from '@/redux/slice/planSlice'
@@ -17,7 +16,6 @@ import SearchSide from '@/components/SearchSide'
 
 import { useRouter } from 'next/router'
 
-import { createOverlay } from '../new'
 import { planType } from '@/interface'
 
 type FormInfoType = {
@@ -42,166 +40,13 @@ export default function PlanEditPage() {
   const [isMine, setIsMine] = useState<boolean>(true)
 
   const [formInfo, setFormInfo] = useState<FormInfoType>(null)
-  const [markerData, setMarkerData] = useState(new Map<string, any>(null))
-
-  /**
-   * @description 마커를 다 감싸도록 지도 조절
-   */
-  const handleBounds = useCallback(() => {
-    const points = []
-
-    if (markerData?.size > 0) {
-      markerData.forEach((value) => {
-        const latlng = new window.kakao.maps.LatLng(
-          value.data?.y,
-          value.data?.x,
-        )
-        points.push(latlng)
-      })
-      var bounds = new window.kakao.maps.LatLngBounds()
-
-      for (let i = 0; i < points.length; i++) {
-        bounds.extend(points[i])
-      }
-
-      map.setBounds(bounds)
-    }
-  }, [map, markerData])
-
-  /**
-   * @description 지도에 마커 및 오버레이 작업
-   */
-  function getMap() {
-    const newMarkerData = new Map()
-
-    var imageSrc = '/icons/default-marker.svg'
-    var imageSize = new window.kakao.maps.Size(30, 35)
-    var markerImage = new window.kakao.maps.MarkerImage(imageSrc, imageSize)
-
-    var bounds = new window.kakao.maps.LatLngBounds()
-    pendingDatas.forEach((data: planType) => {
-      const latlng = new window.kakao.maps.LatLng(data.y, data.x)
-
-      var marker = new window.kakao.maps.Marker({
-        map: map,
-        position: latlng,
-        title: data.place_name,
-        image: markerImage,
-      })
-
-      var content =
-        '<div className="customoverlay" style="padding: 3px 8px; background-color: #EEF6FF; border-radius: 14px; border: 1px solid #EDF2FD; color: #2E5BDC; font-size: small;">' +
-        `    <span className="title">${data.place_name}</span>` +
-        '</div>'
-
-      var customOverlay = new window.kakao.maps.CustomOverlay({
-        map: map,
-        position: latlng,
-        content: content,
-        xAnchor: 0.5,
-        yAnchor: 0,
-      })
-
-      window.kakao.maps.event.addListener(marker, 'mouseover', function () {
-        marker.setZIndex(100)
-        customOverlay.setZIndex(100)
-      })
-
-      window.kakao.maps.event.addListener(marker, 'mouseout', function () {
-        marker.setZIndex(1)
-        customOverlay.setZIndex(1)
-      })
-
-      bounds.extend(latlng)
-
-      newMarkerData.set(data.id, {
-        marker,
-        data: { x: data.x, y: data.y },
-        customOverlay,
-      })
-    })
-
-    map.setBounds(bounds)
-    setMarkerData(newMarkerData)
-  }
 
   /**
    * @description 검색 결과에서 장소 선택
    * @param data 추가하고자 하는 장소의 정보
    */
   function handleSelect(data: planType) {
-    if (markerData.has(data.id)) {
-      data = {
-        ...data,
-        id: `${data.id}${new Date()}`,
-      }
-    }
-
-    var imageSrc = '/icons/default-marker.svg'
-    var imageSize = new window.kakao.maps.Size(30, 35)
-    var markerImage = new window.kakao.maps.MarkerImage(imageSrc, imageSize)
-
-    const latlng = new window.kakao.maps.LatLng(data.y, data.x)
-
-    var marker = new window.kakao.maps.Marker({
-      position: latlng,
-      title: data.place_name,
-      image: markerImage,
-    })
-
-    const customOverlay = createOverlay(data.place_name, latlng, map)
-
-    window.kakao.maps.event.addListener(marker, 'mouseover', function () {
-      marker.setZIndex(100)
-      customOverlay.setZIndex(100)
-    })
-
-    window.kakao.maps.event.addListener(marker, 'mouseout', function () {
-      marker.setZIndex(1)
-      customOverlay.setZIndex(1)
-    })
-
-    dispatch(ADD_MARKER({ data, marker, customOverlay }))
-
-    setMarkerData(
-      (prev) =>
-        new Map(
-          prev.set(data.id, {
-            marker,
-            data: { x: data.x, y: data.y },
-            customOverlay,
-          }),
-        ),
-    )
-
-    showMarkers(map, marker)
-  }
-
-  /**
-   * @description 계획에서 하나의 장소 삭제
-   * @param id 삭제하고자 하는 장소의 id
-   */
-  function removeMarkers(id: string) {
-    if (!markerData.has(id)) return
-
-    // 마커, 오버레이 삭제하기
-    markerData.get(id)?.marker.setMap(null)
-    markerData.get(id)?.customOverlay.setMap(null)
-
-    const newMap = new Map(markerData)
-    newMap.delete(id)
-    setMarkerData(newMap)
-
-    dispatch(REMOVE_MARKERS(id))
-  }
-
-  /**
-   * @description 해당 지도에 해당 마커를 찍음
-   * @param map 지도
-   * @param marker 마커
-   */
-  function showMarkers(map: any, marker: any) {
-    marker.setMap(map)
+    dispatch(ADD_MARKER({ data, map }))
   }
 
   /**
@@ -223,7 +68,26 @@ export default function PlanEditPage() {
 
     if (data._id) {
       setIsNull(false)
-      dispatch(SET_EDIT_DATA(JSON.parse(data.data)))
+
+      const pendingDatasParam = JSON.parse(data.data)
+
+      const mapDatasParam = []
+      pendingDatasParam.forEach((data: planType) => {
+        mapDatasParam.push({
+          id: data.id,
+          x: data.x,
+          y: data.y,
+          place_name: data.place_name,
+        })
+      })
+
+      dispatch(
+        SET_EDIT_DATA({
+          pendingDatas: pendingDatasParam,
+          mapDatas: mapDatasParam,
+          map: map,
+        }),
+      )
       setFormInfo({
         title: data.title,
         isPublic: data.isPublic,
@@ -238,20 +102,10 @@ export default function PlanEditPage() {
 
   useEffect(() => {
     dispatch(CLEAR_MARKERS())
-    getData()
-  }, [dispatch])
-
-  useEffect(() => {
-    if (!isPending) {
-      if (map) {
-        getMap()
-      }
+    if (map) {
+      getData()
     }
-  }, [isPending])
-
-  useEffect(() => {
-    handleBounds()
-  }, [handleBounds, markerData])
+  }, [dispatch, map])
 
   if (!isMine) {
     return (
@@ -277,10 +131,7 @@ export default function PlanEditPage() {
                 <div className='mx-2 text-xl text-blue-800 font-semibold'>
                   장소 검색하기
                 </div>
-                <SearchSide
-                  handleSelect={handleSelect}
-                  removeMarkers={removeMarkers}
-                />
+                <SearchSide handleSelect={handleSelect} />
               </div>
               <div className='w-2/3 mr-4 z-10'>
                 <PlanForm
@@ -288,9 +139,6 @@ export default function PlanEditPage() {
                   planIsPublic={formInfo?.isPublic}
                   planTitle={formInfo?.title}
                   planCity={formInfo?.city}
-                  markerData={markerData}
-                  setMarkerData={setMarkerData}
-                  removeMarkers={removeMarkers}
                 />
               </div>
             </div>
