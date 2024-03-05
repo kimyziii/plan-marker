@@ -24,7 +24,6 @@ import { CITY_NAME_ARRAY } from '@/utils/city'
 import { useRecoilValue } from 'recoil'
 import { mapState } from '@/atom'
 
-const strRegex = /^.+$/
 interface PlanFormProps {
   isEditMode: boolean
   planIsPublic?: boolean
