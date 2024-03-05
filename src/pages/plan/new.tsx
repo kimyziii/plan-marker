@@ -82,36 +82,6 @@ export default function PlanNewPage() {
 
   return (
     <div>
-      {openModal && (
-        <div className='absolute w-full flex justify-center'>
-          <div
-            onClick={() => setOpenModal(false)}
-            className='absolute top-0 left-0 w-full h-[100vh] bg-black opacity-30 z-20'
-          />
-          <div className='absolute w-[500px] h-[55vh] mt-20 transform bg-white z-30 rounded-lg'>
-            <div
-              onClick={() => setOpenModal(false)}
-              className='absolute right-0 px-4 py-4'
-            >
-              <IoCloseOutline size='20' />
-            </div>
-            <div className='px-5 py-5'>
-              <div>{selected.place_name}</div>
-              <div className='w-full min-h-[250px]'>
-                <Image src='/' width={100} height={250} alt='' />
-              </div>
-              <div className='flex flex-row gap-2 justify-start items-center'>
-                <FaMapMarkerAlt />
-                {selected.road_address_name}
-              </div>
-              <div className='flex flex-row gap-2 justify-start items-center'>
-                <FaPhoneAlt />
-                {selected.phone}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
       <div className='md:flex w-full mobile:hidden'>
         <div className='w-1/3 p-4 rounded-md flex flex-col gap-2 z-10'>
           <div className='mx-2 text-xl text-blue-800 font-semibold'>
