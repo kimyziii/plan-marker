@@ -6,19 +6,12 @@ import { IoMdRemoveCircle } from 'react-icons/io'
 import { TiArrowSortedUp } from 'react-icons/ti'
 import { TiArrowSortedDown } from 'react-icons/ti'
 
-import {
-  ChangeEvent,
-  Dispatch,
-  SetStateAction,
-  useEffect,
-  useState,
-} from 'react'
+import { ChangeEvent, useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { selectMid } from '@/redux/slice/authSlice'
 import {
   CLEAR_MARKERS,
   REMOVE_MARKERS,
-  selectMapDatas,
   selectPendingDatas,
   SORT_PENDING_DATAS,
   UPDATE_PENDING_DATAS,
@@ -31,7 +24,7 @@ import { CITY_NAME_ARRAY } from '@/utils/city'
 import { useRecoilValue } from 'recoil'
 import { mapState } from '@/atom'
 
-const numRegex = /^\d+$/
+const numRegex = /^[0-9\b\n\t]+$/ // 백스페이스, 엔터, 탭은 가능
 interface PlanFormProps {
   isEditMode: boolean
   planIsPublic?: boolean
