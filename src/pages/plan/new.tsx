@@ -93,22 +93,6 @@ export default function PlanNewPage() {
             >
               <IoCloseOutline size='20' />
             </div>
-            {selected && (
-              <div className='px-5 py-5'>
-                <div>{selected.place_name}</div>
-                <div className='w-full min-h-[250px]'>
-                  <Image src='/' width={100} height={250} alt='' />
-                </div>
-                <div className='flex flex-row gap-2 justify-start items-center'>
-                  <FaMapMarkerAlt />
-                  {selected.road_address_name}
-                </div>
-                <div className='flex flex-row gap-2 justify-start items-center'>
-                  <FaPhoneAlt />
-                  {selected.phone}
-                </div>
-              </div>
-            )}
           </div>
         </div>
       )}
