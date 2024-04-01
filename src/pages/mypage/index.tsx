@@ -22,9 +22,9 @@ export default function MyPage() {
   const auth = useSelector(selectAuth)
   const mid = useSelector(selectMid)
 
-  const [nickname, setNickname] = useState<string>(null)
+  const [nickname, setNickname] = useState<string>('')
   const [editMode, setEditMode] = useState<boolean>(false)
-  const [error, setError] = useState<string>(null)
+  const [error, setError] = useState<string>('')
 
   const [isNull, setIsNull] = useState<boolean>(false)
   const [plans, setPlans] = useState<dataType[]>([])
@@ -34,17 +34,15 @@ export default function MyPage() {
    */
   async function getData() {
     if (auth) {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/plans/${auth.mid}`,
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+      const response = await fetch(`/api/plans?userId=${auth.mid}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
         },
-      )
+      })
 
-      const data = await response.json()
+      const result = await response.json()
+      const data = result.plans
 
       if (data.length === 0) {
         setIsNull(true)
@@ -71,24 +69,23 @@ export default function MyPage() {
    * 중복되는 닉네임이 있을 경우 에러 메세지 표시
    */
   async function handleSave() {
-    setError(null)
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/${auth.mid}`,
-      {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ nickname }),
+    setError('')
+    const response = await fetch(`/api/user?userId=${auth.mid}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
       },
-    )
+      body: JSON.stringify({ nickname }),
+    })
     const result = await response.json()
 
-    if (response.status === 200) {
-      dispatch(SET_ACTIVE_USER({ ...auth, nickname: nickname }))
+    if (result.status === 200) {
+      dispatch(SET_ACTIVE_USER({ ...auth, nickname }))
       setEditMode(false)
-    } else if (response.status === 409) {
-      setError(result.message)
+    } else if (result.status === 204) {
+      Notify.info(`기존 닉네임과 동일한 닉네임입니다.`)
+    } else if (result.status === 409) {
+      setError(`중복된 닉네임입니다. 다른 닉네임을 사용해 주세요.`)
     }
   }
 
@@ -98,7 +95,7 @@ export default function MyPage() {
   function handleCancel() {
     setNickname(auth.nickname)
     setEditMode(false)
-    setError(null)
+    setError('')
   }
 
   /**
@@ -112,21 +109,22 @@ export default function MyPage() {
       '삭제',
       '취소',
       async () => {
-        const result = await fetch(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/plan/${id}`,
-          {
-            method: 'DELETE',
-            credentials: 'include',
-            headers: {
-              'Content-Type': 'application/json',
-            },
+        const response = await fetch(`/api/plan?planId=${id}`, {
+          method: 'DELETE',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
           },
-        )
+        })
+
+        const result = await response.json()
         if (result.status === 200) {
           Notify.success(`삭제 완료!`, {
             clickToClose: true,
           })
-          router.refresh()
+          setTimeout(() => {
+            router.refresh()
+          }, 1000)
         }
       },
       () => {},
@@ -166,47 +164,47 @@ export default function MyPage() {
   function deleteAuth() {
     const curUser = currentUser.currentUser
 
-    deleteUser(curUser)
-      .then(async () => {
-        try {
-          const result = await fetch(
-            `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/${mid}`,
-            {
+    if (curUser) {
+      deleteUser(curUser)
+        .then(async () => {
+          try {
+            const response = await fetch(`/api/user?userId=${mid}`, {
               method: 'DELETE',
               credentials: 'include',
               headers: {
                 'Content-Type': 'application/json',
               },
-            },
-          )
-          if (result.status === 200) {
-            Notify.success('성공적으로 계정을 삭제했습니다.')
+            })
+            const result = await response.json()
+            if (result.status === 200) {
+              Notify.success('성공적으로 계정을 삭제했습니다.')
+            }
+          } catch (err) {
+            Notify.failure(err.message)
           }
-        } catch (err) {
-          Notify.failure(err.message)
-        }
-      })
-      .catch((err) => {
-        if (err.code.includes(`recent-login`)) {
-          Confirm.show(
-            '로그인 재요청',
-            `해당 작업에는 재로그인이 필요합니다. <br> 로그인 페이지로 이동하시겠습니까?`,
-            '이동',
-            '취소',
-            () => {
-              router.push('/login')
-            },
-            () => {},
-            {
-              titleColor: 'black',
-              okButtonBackground: '#dc2626',
-              okButtonColor: 'white',
-              borderRadius: '8px',
-              plainText: false,
-            },
-          )
-        }
-      })
+        })
+        .catch((err) => {
+          if (err.code.includes(`recent-login`)) {
+            Confirm.show(
+              '로그인 재요청',
+              `해당 작업에는 재로그인이 필요합니다. <br> 로그인 페이지로 이동하시겠습니까?`,
+              '이동',
+              '취소',
+              () => {
+                router.push('/login')
+              },
+              () => {},
+              {
+                titleColor: 'black',
+                okButtonBackground: '#dc2626',
+                okButtonColor: 'white',
+                borderRadius: '8px',
+                plainText: false,
+              },
+            )
+          }
+        })
+    }
   }
 
   useEffect(() => {

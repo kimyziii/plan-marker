@@ -23,23 +23,22 @@ export default function PlanDetailPage() {
   const mid = useSelector(selectMid)
   const pendingDatas = useSelector(selectPendingDatas)
 
-  const [data, setData] = useState(null)
+  const [data, setData] = useState<any>(null)
   const [isNull, setIsNull] = useState<boolean>(false)
 
   /**
    * @description 하나의 여행 계획 데이터 조회
    */
   async function getData() {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/plan/${id}`,
-      {
-        method: 'GET',
-        credentials: 'include',
-      },
-    )
-    const data = await response.json()
+    const response = await fetch(`/api/plan?planId=${id}`, {
+      method: 'GET',
+      credentials: 'include',
+    })
+    const result = await response.json()
+    const status = result.status
 
-    if (data._id) {
+    if (status === 200) {
+      const data = result.data
       setIsNull(false)
       setData(data)
     } else {
@@ -64,21 +63,22 @@ export default function PlanDetailPage() {
       '삭제',
       '취소',
       async () => {
-        const result = await fetch(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/plan/${id}`,
-          {
-            method: 'DELETE',
-            credentials: 'include',
-            headers: {
-              'Content-Type': 'application/json',
-            },
+        const response = await fetch(`/api/plan?planId=${id}`, {
+          method: 'DELETE',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
           },
-        )
+        })
+
+        const result = await response.json()
         if (result.status === 200) {
           Notify.success(`삭제 완료!`, {
             clickToClose: true,
           })
-          router.push('/')
+          setTimeout(() => {
+            router.push('/')
+          }, 1000)
         }
       },
       () => {},
@@ -97,7 +97,7 @@ export default function PlanDetailPage() {
   useEffect(() => {
     if (data) {
       const pendingDatasParam = JSON.parse(data.data)
-      const mapDatasParam = []
+      const mapDatasParam: any[] = []
       pendingDatasParam.forEach((data: planType) => {
         mapDatasParam.push({
           id: data.id,

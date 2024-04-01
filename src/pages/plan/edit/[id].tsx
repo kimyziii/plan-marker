@@ -39,7 +39,7 @@ export default function PlanEditPage() {
   const [isNull, setIsNull] = useState<boolean>(false)
   const [isMine, setIsMine] = useState<boolean>(true)
 
-  const [formInfo, setFormInfo] = useState<FormInfoType>(null)
+  const [formInfo, setFormInfo] = useState<FormInfoType | null>(null)
 
   /**
    * @description 검색 결과에서 장소 선택
@@ -53,55 +53,56 @@ export default function PlanEditPage() {
    * @description 수정하고자 하는 계획의 데이터 조회
    */
   async function getData() {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/plan/${id}`,
-      {
-        method: 'GET',
-        credentials: 'include',
-      },
-    )
-    const data = await response.json()
-    if (data.createdById !== createdById) {
-      setIsMine(false)
-      return
-    }
+    const response = await fetch(`/api/plan?planId=${id}`, {
+      method: 'GET',
+      credentials: 'include',
+    })
+    const result = await response.json()
 
-    if (data._id) {
-      setIsNull(false)
+    if (result.status === 200) {
+      const data = result.data
+      if (data.createdById !== createdById) {
+        setIsMine(false)
+        return
+      }
 
-      const pendingDatasParam = JSON.parse(data.data)
+      if (data._id) {
+        setIsNull(false)
 
-      const mapDatasParam = []
-      pendingDatasParam.forEach((data: planType) => {
-        mapDatasParam.push({
-          id: data.id,
-          x: data.x,
-          y: data.y,
-          place_name: data.place_name,
+        const pendingDatasParam = JSON.parse(data.data)
+
+        const mapDatasParam: any[] = []
+        pendingDatasParam.forEach((data: any) => {
+          mapDatasParam.push({
+            id: data.id,
+            x: data.x,
+            y: data.y,
+            place_name: data.place_name,
+          })
         })
-      })
 
-      dispatch(
-        SET_EDIT_DATA({
-          pendingDatas: pendingDatasParam,
-          mapDatas: mapDatasParam,
-          map: map,
-        }),
-      )
-      setFormInfo({
-        title: data.title,
-        isPublic: data.isPublic,
-        city: data.city,
-      })
+        dispatch(
+          SET_EDIT_DATA({
+            pendingDatas: pendingDatasParam,
+            mapDatas: mapDatasParam,
+            map: map,
+          }),
+        )
+        setFormInfo({
+          title: data.title,
+          isPublic: data.isPublic,
+          city: data.city,
+        })
 
-      setIsPending(false)
+        setIsPending(false)
+      }
     } else {
       setIsNull(true)
     }
   }
 
   useEffect(() => {
-    dispatch(CLEAR_MARKERS())
+    dispatch(CLEAR_MARKERS(map))
     if (map) {
       getData()
     }

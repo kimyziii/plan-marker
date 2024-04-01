@@ -22,16 +22,15 @@ const PlanCard = ({ plan }) => {
       '삭제',
       '취소',
       async () => {
-        const result = await fetch(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/plan/${id}`,
-          {
-            method: 'DELETE',
-            credentials: 'include',
-            headers: {
-              'Content-Type': 'application/json',
-            },
+        const response = await fetch(`/api/plan?planId=${id}`, {
+          method: 'DELETE',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
           },
-        )
+        })
+
+        const result = await response.json()
         if (result.status === 200) {
           Notify.success(`삭제 완료!`, {
             clickToClose: true,

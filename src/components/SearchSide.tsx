@@ -21,7 +21,7 @@ export default function SearchSide({
   const [isNull, setIsNull] = useState<boolean>(true)
   const [noData, setNoData] = useState<boolean>(false)
   const [searchKeyword, setSearchKeyword] = useState<string>('')
-  const [resultData, setResultData] = useState<searchResultType[]>(null)
+  const [resultData, setResultData] = useState<searchResultType[] | null>(null)
 
   const places = useRecoilValue(placesState)
 

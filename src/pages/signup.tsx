@@ -35,33 +35,34 @@ const SignupPage = () => {
           nickname: user.email,
           email: user.email,
           uid: user.uid,
-          createdAt: user.metadata.creationTime,
-          lastLoginAt: user.metadata.lastSignInTime,
         }
 
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/signup`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(obj),
+        const response = await fetch(`/api/user`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
           },
-        )
+          body: JSON.stringify(obj),
+        })
 
         const result = await response.json()
-        Notify.success('회원가입 완료!', {
-          clickToClose: true,
-        })
-        dispatch(
-          SET_ACTIVE_USER({
-            nickname: result.nickname,
-            email: result.email,
-            mid: result._id,
-          }),
-        )
-        router.push('/')
+
+        if (result.status === 201) {
+          const data = result.data
+
+          Notify.success('회원가입 완료!', {
+            clickToClose: true,
+          })
+
+          dispatch(
+            SET_ACTIVE_USER({
+              nickname: data.nickname,
+              email: data.email,
+              mid: data._id,
+            }),
+          )
+          router.push('/')
+        }
       })
       .catch((error) => {
         console.error(error)

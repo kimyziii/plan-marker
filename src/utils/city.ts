@@ -19,5 +19,9 @@ export const CITY_ARRAY: CityArrType = [
 ]
 
 export const CITY_NAME_ARRAY = CITY_ARRAY.map((item) => item[0])
+const CITY_MAP: { [key: string]: number } = {}
+CITY_ARRAY.forEach(([city, number]) => {
+  CITY_MAP[city] = number
+})
 
-export const CITY_MAP = new Map(CITY_ARRAY)
+export default CITY_MAP

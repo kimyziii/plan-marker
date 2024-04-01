@@ -94,25 +94,28 @@ export default function PlanForm({
     setIsTitleError(false)
     const data = makeData()
 
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/plans/${id}`,
-      {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          title,
-          isPublic,
-          modifiedAt: new Date(),
-          data,
-          city,
-        }),
+    const response = await fetch(`/api/plan?planId=${id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
       },
-    )
+      credentials: 'include',
+      body: JSON.stringify({
+        title,
+        isPublic,
+        modifiedAt: new Date(),
+        data,
+        city,
+      }),
+    })
 
-    if (response.status === 200) {
+    const result = await response.json()
+
+    if (result.status === 200) {
+      Notify.success(`계획을 성공적으로 업데이트했습니다.`)
+      router.replace(`/plan/${id}`)
+    } else if (result.status === 204) {
+      Notify.info(`문제가 생겼습니다. <br/>이전 페이지로 돌아갑니다.`)
       router.replace(`/plan/${id}`)
     }
   }
@@ -131,28 +134,23 @@ export default function PlanForm({
     setIsTitleError(false)
     const data = makeData()
 
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/plans`,
-      {
-        method: 'POST',
-        body: JSON.stringify({
-          title,
-          isPublic,
-          createdById: mId,
-          createdAt: new Date(),
-          modifiedAt: new Date(),
-          data,
-          city,
-        }),
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+    const response = await fetch(`/api/plan`, {
+      method: 'POST',
+      body: JSON.stringify({
+        title,
+        isPublic,
+        createdById: mId,
+        data,
+        city,
+      }),
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
       },
-    )
+    })
 
     const result = await response.json()
-    const planId = result.id
+    const planId = result.createdPlanId
     router.replace(`/plan/${planId}`)
   }
 
@@ -250,10 +248,10 @@ export default function PlanForm({
   }
 
   useEffect(() => {
-    if (isEditMode) {
+    if (isEditMode && planTitle && planIsPublic) {
       setTitle(planTitle)
       setIsPublic(planIsPublic)
-      setCity(planCity)
+      setCity(planCity || '')
     }
   }, [planTitle, planIsPublic])
 

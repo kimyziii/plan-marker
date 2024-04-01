@@ -27,7 +27,7 @@ export default function PlanNewPage() {
 
   const dispatch = useDispatch()
 
-  const [selected, setSelected] = useState<searchResultType>(null)
+  const [selected, setSelected] = useState<searchResultType | null>(null)
   const [openModal, setOpenModal] = useState<boolean>(false)
   const [markerData, setMarkerData] = useState(new Map<string, any>(null))
 
@@ -38,8 +38,6 @@ export default function PlanNewPage() {
     const response = await fetch(
       `https://maps.googleapis.com/maps/api/geocode/json?address=${data.address_name}&language=ko&key=${process.env.NEXT_PUBLIC_GOOGLE_MAP_API_KEY}`,
     )
-    const result = await response.json()
-    console.log(result)
   }
 
   async function getPhotos(placeId: string) {
@@ -82,6 +80,38 @@ export default function PlanNewPage() {
 
   return (
     <div>
+      {openModal && (
+        <div className='absolute w-full flex justify-center'>
+          <div
+            onClick={() => setOpenModal(false)}
+            className='absolute top-0 left-0 w-full h-[100vh] bg-black opacity-30 z-20'
+          />
+          <div className='absolute w-[500px] h-[55vh] mt-20 transform bg-white z-30 rounded-lg'>
+            <div
+              onClick={() => setOpenModal(false)}
+              className='absolute right-0 px-4 py-4'
+            >
+              <IoCloseOutline size='20' />
+            </div>
+            {selected && (
+              <div className='px-5 py-5'>
+                <div>{selected.place_name}</div>
+                <div className='w-full min-h-[250px]'>
+                  <Image src='/' width={100} height={250} alt='' />
+                </div>
+                <div className='flex flex-row gap-2 justify-start items-center'>
+                  <FaMapMarkerAlt />
+                  {selected.road_address_name}
+                </div>
+                <div className='flex flex-row gap-2 justify-start items-center'>
+                  <FaPhoneAlt />
+                  {selected.phone}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
       <div className='md:flex w-full mobile:hidden'>
         <div className='w-1/3 p-4 rounded-md flex flex-col gap-2 z-10'>
           <div className='mx-2 text-xl text-blue-800 font-semibold'>

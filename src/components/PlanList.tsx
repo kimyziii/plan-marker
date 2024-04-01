@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { CITY_MAP } from '@/utils/city'
+import CITY_MAP from '../utils/city'
 import { dataType, DataTypeGroup } from '@/interface'
 import PlanCitySection from './plan/PlanCitySection'
 
@@ -12,17 +12,15 @@ export default function PlanList() {
    * @description 공개로 설정 된 모든 여행 계획 리스트를 가져옴
    */
   async function getPlans() {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/plans`,
-      {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
+    const response = await fetch(`/api/plans`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
       },
-    )
-    const data = await response.json()
+      credentials: 'include',
+    })
+    const result = await response.json()
+    const data = result.plans
 
     const plansObj: { [city: string]: dataType[] } = {}
     data.forEach((d: dataType) => {
@@ -39,7 +37,7 @@ export default function PlanList() {
 
     // 도시 배열 순서대로 정렬
     plans.sort((a, b) => {
-      return CITY_MAP.get(a.city) - CITY_MAP.get(b.city)
+      return CITY_MAP[a.city] - CITY_MAP[b.city]
     })
 
     // 도시의 경로들에 대해 생성일자 내림차순으로 정렬

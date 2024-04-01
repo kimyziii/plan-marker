@@ -38,41 +38,49 @@ export default function LoginPage() {
 
         const obj = {
           email: user.email,
-          lastLoginAt: user.metadata.lastSignInTime,
+          uid: user.uid,
         }
 
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/login/sns`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(obj),
+        const response = await fetch(`/api/sns`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
           },
-        )
+          body: JSON.stringify(obj),
+        })
 
         const res = await response.json()
 
-        dispatch(
-          SET_ACTIVE_USER({
-            nickname: res.nickname,
-            mid: res._id,
-            email: res.email,
-          }),
-        )
-
-        if (response.status === 200) {
-          Notify.success('로그인 완료!', {
-            clickToClose: true,
-          })
+        if (res.status === 400) {
+          Notify.failure(
+            `회원가입 및 로그인이 되지 않았습니다. 다시 시도해 주세요.`,
+          )
         } else {
-          Notify.success('회원가입 및 로그인 완료!', {
-            clickToClose: true,
-          })
-        }
+          const data = res.data
+          dispatch(
+            SET_ACTIVE_USER({
+              nickname: data.nickname,
+              mid: data._id,
+              email: data.email,
+            }),
+          )
 
-        router.push('/')
+          if (res.status === 200) {
+            Notify.success(`로그인 완료!`, {
+              clickToClose: true,
+            })
+          }
+
+          if (res.status === 201) {
+            Notify.success(`회원가입 및 로그인 완료!`, {
+              clickToClose: true,
+            })
+          }
+
+          setTimeout(() => {
+            router.push('/')
+          }, 1000)
+        }
       })
       .catch((err) => {
         console.error(err.message)
@@ -87,36 +95,45 @@ export default function LoginPage() {
       .then(async (userCredential) => {
         const user = userCredential.user
 
-        const obj = {
-          uid: user.uid,
-          lastLoginAt: user.metadata.lastSignInTime,
-        }
-
         try {
           const response = await fetch(
-            `${process.env.NEXT_PUBLIC_BACKEND_URL}/login`,
-            {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify(obj),
-            },
+            `/api/user?uId=${user.uid}&lastLoginAt=${user.metadata.lastSignInTime}`,
           )
-
           const result = await response.json()
 
-          dispatch(
-            SET_ACTIVE_USER({
-              nickname: result.nickname,
-              mid: result._id,
-              email: result.email,
-            }),
-          )
+          if (result.status === 404) {
+            Notify.failure(`로그인에 실패했습니다.<br/>잠시후 시도해 주세요.`, {
+              clickToClose: true,
+              plainText: false,
+            })
+          }
 
-          router.push('/')
+          if (result.status === 204) {
+            Notify.failure(
+              `존재하지 않는 회원정보입니다.<br/>회원가입을 진행해주세요.`,
+              {
+                clickToClose: true,
+                plainText: false,
+              },
+            )
+          }
+
+          if (result.status === 200) {
+            const { nickname, _id, email } = result.data
+
+            dispatch(
+              SET_ACTIVE_USER({
+                nickname,
+                mid: _id,
+                email,
+              }),
+            )
+
+            router.push('/')
+          }
         } catch (err) {
-          console.error(err)
+          console.log(err)
+          throw new Error(err)
         }
       })
       .catch((error) => {
