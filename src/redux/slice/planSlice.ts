@@ -127,7 +127,7 @@ const planSlice = createSlice({
     ) => {
       const { name, value, id } = action.payload
       const planToUpdate = state.pendingDatas.find((plan) => plan.id === id)
-      planToUpdate[name] = value
+      if (planToUpdate) planToUpdate[name] = value
     },
 
     SORT_PENDING_DATAS: (
@@ -234,7 +234,7 @@ function addMapData(data, idx: number) {
 }
 
 function handleBounds(data, map) {
-  const points = []
+  const points: any[] = []
 
   if (data?.length > 0) {
     data.forEach((value) => {
