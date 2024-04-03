@@ -1,4 +1,4 @@
-import Plan, { IPlan } from '@/models/plan'
+import Plan from '@/models/plan'
 import User from '@/models/user'
 import connectMongo, { cached } from '@/utils/mongoose-connect'
 import { Types } from 'mongoose'
@@ -9,10 +9,11 @@ export async function GET(req: NextRequest) {
 
   try {
     const selectedPlan = await Plan.findById(planId)
+    if (!selectedPlan) throw new Error()
     const createdByName = await User.findById(selectedPlan.createdById)
     const returnObj = {
       ...selectedPlan._doc,
-      createdByName: createdByName.nickname,
+      createdByName: createdByName ? createdByName.nickname : '정보없음',
     }
     return NextResponse.json({ status: 200, data: returnObj })
   } catch (error) {

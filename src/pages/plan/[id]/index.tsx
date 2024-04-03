@@ -13,8 +13,35 @@ import { useRouter } from 'next/router'
 import { Confirm, Notify } from 'notiflix'
 import { planType } from '@/interface'
 import { selectPendingDatas, SET_EDIT_DATA } from '@/redux/slice/planSlice'
+import { InferGetServerSidePropsType } from 'next'
 
-export default function PlanDetailPage() {
+export const getServerSideProps = async (context) => {
+  const { params } = context
+  const { id } = params
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_NEXTAUTH_URL}/api/plan?planId=${id}`,
+    {
+      method: 'GET',
+      credentials: 'include',
+    },
+  )
+  const result = await response.json()
+  const status = result.status
+
+  if (status === 200) {
+    const data = result.data
+    return { props: { status: 200, plan: data } }
+  }
+
+  if (status === 400) {
+    return { props: { status: 400 } }
+  }
+}
+
+export default function PlanDetailPage({
+  status,
+  plan,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter()
   const dispatch = useDispatch()
   const { id } = router.query
@@ -25,26 +52,6 @@ export default function PlanDetailPage() {
 
   const [data, setData] = useState<any>(null)
   const [isNull, setIsNull] = useState<boolean>(false)
-
-  /**
-   * @description 하나의 여행 계획 데이터 조회
-   */
-  async function getData() {
-    const response = await fetch(`/api/plan?planId=${id}`, {
-      method: 'GET',
-      credentials: 'include',
-    })
-    const result = await response.json()
-    const status = result.status
-
-    if (status === 200) {
-      const data = result.data
-      setIsNull(false)
-      setData(data)
-    } else {
-      setIsNull(true)
-    }
-  }
 
   /**
    * @description 수정 페이지로 이동
@@ -91,7 +98,16 @@ export default function PlanDetailPage() {
     )
   }
   useEffect(() => {
-    if (map) getData()
+    if (map) {
+      if (status === 200) {
+        setData(plan)
+        setIsNull(false)
+      }
+      if (status === 400) {
+        setData(null)
+        setIsNull(true)
+      }
+    }
   }, [map])
 
   useEffect(() => {
@@ -106,6 +122,7 @@ export default function PlanDetailPage() {
           place_name: data.place_name,
         })
       })
+      console.log(pendingDatasParam)
       dispatch(
         SET_EDIT_DATA({
           pendingDatas: pendingDatasParam,
@@ -115,6 +132,17 @@ export default function PlanDetailPage() {
       )
     }
   }, [data])
+
+  if (isNull) {
+    return (
+      <>
+        <div className='py-20 text-sm flex flex-col justify-center items-center'>
+          <span>해당 경로를 찾을 수 없습니다.</span>
+          <span> 다시 시도해주세요.</span>
+        </div>
+      </>
+    )
+  }
 
   return (
     <div className='w-[90%] mx-auto'>
@@ -238,15 +266,6 @@ export default function PlanDetailPage() {
           </div>
         </div>
       </div>
-
-      {isNull && (
-        <>
-          <div className='py-20 text-sm flex flex-col justify-center items-center'>
-            <span>해당 경로를 찾을 수 없습니다.</span>
-            <span> 다시 시도해주세요.</span>
-          </div>
-        </>
-      )}
     </div>
   )
 }
