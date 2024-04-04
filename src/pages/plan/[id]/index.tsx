@@ -122,7 +122,7 @@ export default function PlanDetailPage({
           place_name: data.place_name,
         })
       })
-      console.log(pendingDatasParam)
+
       dispatch(
         SET_EDIT_DATA({
           pendingDatas: pendingDatasParam,

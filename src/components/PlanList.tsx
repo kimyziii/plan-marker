@@ -3,7 +3,7 @@ import CITY_MAP from '../utils/city'
 import { dataType, DataTypeGroup } from '@/interface'
 import PlanCitySection from './plan/PlanCitySection'
 
-export default function PlanList() {
+export default function PlanList({ data }) {
   // 계획 리스트 상태
   const [isNull, setIsNull] = useState<boolean>(false)
   const [plans, setPlans] = useState<DataTypeGroup[]>([])
@@ -12,15 +12,10 @@ export default function PlanList() {
    * @description 공개로 설정 된 모든 여행 계획 리스트를 가져옴
    */
   async function getPlans() {
-    const response = await fetch(`/api/plans`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-    })
-    const result = await response.json()
-    const data = result.plans
+    if (data.length === 0) {
+      setIsNull(true)
+      return
+    }
 
     const plansObj: { [city: string]: dataType[] } = {}
     data.forEach((d: dataType) => {
@@ -46,11 +41,6 @@ export default function PlanList() {
         return b.createdAt.toString().localeCompare(a.createdAt.toString())
       })
     })
-
-    if (data.length === 0) {
-      setIsNull(true)
-      return
-    }
 
     setPlans(plans)
   }
